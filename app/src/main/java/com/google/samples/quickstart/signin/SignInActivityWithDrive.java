@@ -11,6 +11,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,11 +53,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         StrictMode.setThreadPolicy(policy);
         // Views
         mStatusTextView = findViewById(R.id.status);
-
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
-        findViewById(R.id.disconnect_button).setOnClickListener(this);
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -164,7 +163,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
             String authCode = account.getServerAuthCode();
             String accessToken = "";
-
+            findViewById(R.id.plain_text_input).setVisibility(View.GONE);
+            findViewById(R.id.status).setVisibility(View.GONE);
             try {
                 GoogleTokenResponse tokenResponse =
                         new GoogleAuthorizationCodeTokenRequest(
@@ -181,17 +181,18 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             } catch (Exception e) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
             }
-            mStatusTextView.setText(getString(R.string.signed_in_fmt, accessToken));
+//            mStatusTextView.setText(getString(R.string.signed_in_fmt, accessToken));
             Log.i("Token", accessToken);
 
 
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
-
+            findViewById(R.id.plain_text_input).setVisibility(View.VISIBLE);
+            findViewById(R.id.status).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+            findViewById(R.id.sign_out_button).setVisibility(View.GONE);
         }
     }
 
@@ -204,8 +205,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 break;
             case R.id.sign_out_button:
                 signOut();
-                break;
-            case R.id.disconnect_button:
                 revokeAccess();
                 break;
         }

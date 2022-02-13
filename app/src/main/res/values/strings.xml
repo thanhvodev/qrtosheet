@@ -6,7 +6,7 @@
     <string name="signed_in_fmt">Signed in as: %s</string>
     <string name="signed_in">Signed in</string>
     <string name="signing_in">Signing in…</string>
-    <string name="signed_out">Signed out</string>
+    <string name="signed_out">Spreadsheet ID:</string>
     <string name="signed_in_err">"Error: please check logs."</string>
     <string name="error_null_person">
         Error: Plus.PeopleApi.getCurrentPerson returned null. Ensure that the Google+ API is
@@ -55,4 +55,5 @@
     <string name="server_client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
     <string name="client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
     <string name="client_secret">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</string>
+    <string name="input_spreadsheet_id">Input Spreadsheet ID...</string>
 </resources>
