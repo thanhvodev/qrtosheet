@@ -1,20 +1,31 @@
 package com.google.samples.quickstart.signin;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.budiyev.android.codescanner.CodeScanner;
+import com.budiyev.android.codescanner.CodeScannerView;
+import com.budiyev.android.codescanner.DecodeCallback;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -25,10 +36,10 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.zxing.Result;
 
 
 /**
@@ -40,7 +51,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
-
+    private CodeScanner mCodeScanner;
+    boolean CameraPermission = false;
+    final int CAMERA_PERM = 1;
     private GoogleSignInClient mGoogleSignInClient;
 
     private TextView mStatusTextView;
@@ -49,6 +62,29 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        CodeScannerView scannerView = findViewById(R.id.scanner_view);
+        mCodeScanner = new CodeScanner(this, scannerView);
+        askPermission();
+        if (CameraPermission) {
+            scannerView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mCodeScanner.startPreview();
+                }
+            });
+
+            mCodeScanner.setDecodeCallback(new DecodeCallback() {
+                @Override
+                public void onDecoded(@NonNull Result result) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+        }
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         // Views
@@ -95,6 +131,73 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
+    private void askPermission() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM);
+            } else {
+                mCodeScanner.startPreview();
+                CameraPermission = true;
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == CAMERA_PERM) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mCodeScanner.startPreview();
+                CameraPermission = true;
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                    new AlertDialog.Builder(this).setTitle("Permission").setMessage("Please provide the camera permission for using all the features of the app")
+                            .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM);
+                                }
+                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    }).create().show();
+                } else {
+                    new AlertDialog.Builder(this).setTitle("Permission").setMessage("You have denied some permission. Allow all permission at [Settings] > [Permissions]")
+                            .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                    finish();
+
+                                }
+                            }).setNegativeButton("No, Exit app", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            finish();
+                        }
+                    }).create().show();
+                }
+            }
+        }
+
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onPause() {
+        if (CameraPermission) {
+            mCodeScanner.releaseResources();
+        }
+        super.onPause();
+
+    }
+
     // [START onActivityResult]
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -110,8 +213,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     // [START handleSignInResult]
     private void handleSignInResult(@Nullable Task<GoogleSignInAccount> completedTask) {
-        Log.d(TAG, "handleSignInResult:" + completedTask.isSuccessful());
-
         try {
             // Signed in successfully, show authenticated U
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
@@ -165,6 +266,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             String accessToken = "";
             findViewById(R.id.plain_text_input).setVisibility(View.GONE);
             findViewById(R.id.status).setVisibility(View.GONE);
+            findViewById(R.id.frameLayout).setVisibility(View.VISIBLE);
+            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+
             try {
                 GoogleTokenResponse tokenResponse =
                         new GoogleAuthorizationCodeTokenRequest(
@@ -179,20 +284,18 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 accessToken = tokenResponse.getAccessToken();
 
             } catch (Exception e) {
-                Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
             }
 //            mStatusTextView.setText(getString(R.string.signed_in_fmt, accessToken));
             Log.i("Token", accessToken);
 
 
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
         } else {
             mStatusTextView.setText(R.string.signed_out);
             findViewById(R.id.plain_text_input).setVisibility(View.VISIBLE);
             findViewById(R.id.status).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_button).setVisibility(View.GONE);
+            findViewById(R.id.frameLayout).setVisibility(View.GONE);
         }
     }
 
