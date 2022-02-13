@@ -11,11 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +41,17 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.zxing.Result;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 /**
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
@@ -55,13 +66,22 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     boolean CameraPermission = false;
     final int CAMERA_PERM = 1;
     private GoogleSignInClient mGoogleSignInClient;
-
     private TextView mStatusTextView;
 
+    private static String accessToken = "";
+    private static String spreedsheetID = "1-UtMttm026ZF3-km1eo-eBZ8FVth_QTpjI0mgqHB09I";
+    private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
+
+    private static String date;
+    private static String dateTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        date = getDate();
+        dateTime = getDateTime();
+
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
         askPermission();
@@ -80,6 +100,13 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                         @Override
                         public void run() {
                             Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
+                            try {
+                                createSheetPerDay();
+                                appendSheet();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                         }
                     });
                 }
@@ -263,12 +290,13 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         if (account != null) {
 
             String authCode = account.getServerAuthCode();
-            String accessToken = "";
             findViewById(R.id.plain_text_input).setVisibility(View.GONE);
             findViewById(R.id.status).setVisibility(View.GONE);
             findViewById(R.id.frameLayout).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
+
+//            String accessToken = "";
 
             try {
                 GoogleTokenResponse tokenResponse =
@@ -311,5 +339,51 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 revokeAccess();
                 break;
         }
+    }
+
+    private static void createSheetPerDay() throws IOException {
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + date + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 20,\r\n            \"columnCount\": 12\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
+        Request request = new Request.Builder()
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreedsheetID +":batchUpdate")
+                .method("POST", body)
+                .addHeader("Authorization", "Bearer " +  accessToken)
+                .addHeader("Content-Type", "text/plain")
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+        } catch (Exception e) {
+
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private static String getDateTime() {
+        return String.valueOf(LocalDateTime.now());
+    }
+
+    @SuppressLint("NewApi")
+    private static String getDate() {
+        return String.valueOf(LocalDate.now());
+    }
+//
+//    private static String getDateTime() {
+//
+//    }
+
+    private static void appendSheet() throws IOException {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"1\",\r\n      \"2\",\r\n      \"3\"\r\n    ]\r\n  ]\r\n}");
+        Request request = new Request.Builder()
+                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreedsheetID +"/values/Sheet1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                                .method("POST", body)
+                                .addHeader("Authorization", "Bearer " + accessToken)
+                                .addHeader("Content-Type", "text/plain")
+                                .build();
+        Response response = client.newCall(request).execute();
     }
 }

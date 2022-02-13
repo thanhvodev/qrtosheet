@@ -54,4 +54,8 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.budiyev.android:code-scanner:2.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'com.mashape.unirest:unirest-java:1.4.9'
+
+
 }
