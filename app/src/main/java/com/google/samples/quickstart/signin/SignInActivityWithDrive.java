@@ -19,7 +19,9 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +42,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Calendar;
 
 import okhttp3.MediaType;
@@ -63,7 +64,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     boolean CameraPermission = false;
     final int CAMERA_PERM = 1;
     private GoogleSignInClient mGoogleSignInClient;
-    private TextView mStatusTextView;
 
     private String accessToken = "";
     private String spreadsheetID = "";
@@ -74,10 +74,23 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private int currentDay;
     private int lastDay;
 
+    private TextView email;
+    private FrameLayout frameLayout;
+    private Button sign_out_button;
+    private SignInButton signInButton;
+    private TextView mStatusTextView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        email = findViewById(R.id.email);
+        frameLayout = findViewById(R.id.frameLayout);
+        signInButton = findViewById(R.id.sign_in_button);
+        sign_out_button = findViewById(R.id.sign_out_button);
+        mStatusTextView = findViewById(R.id.status);
 
         spreadID = findViewById(R.id.editText);
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
@@ -111,7 +124,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         // Views
-        mStatusTextView = findViewById(R.id.status);
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
@@ -136,7 +148,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         // [START customize_button]
         // Customize sign-in button. The sign-in button can be displayed in
         // multiple sizes.
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
+
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         // [END customize_button]
     }
@@ -284,41 +296,22 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
             String authCode = account.getServerAuthCode();
             userName = account.getDisplayName();
-            TextView email = findViewById(R.id.email);
             email.setText(account.getEmail());
-            findViewById(R.id.email).setVisibility(View.VISIBLE);
-            findViewById(R.id.editText).setVisibility(View.GONE);
-            findViewById(R.id.status).setVisibility(View.GONE);
-            findViewById(R.id.frameLayout).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
-
-            try {
-                GoogleTokenResponse tokenResponse =
-                        new GoogleAuthorizationCodeTokenRequest(
-                                new NetHttpTransport(),
-                                JacksonFactory.getDefaultInstance(),
-                                "https://accounts.google.com/o/oauth2/token",
-                                getString(R.string.client_id),
-                                getString(R.string.client_secret),
-                                authCode,
-                                "")
-                                .execute();
-                accessToken = tokenResponse.getAccessToken();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Log.i("Token", accessToken);
+            email.setVisibility(View.VISIBLE);
+            spreadID.setVisibility(View.GONE);
+            mStatusTextView.setVisibility(View.GONE);
+            frameLayout.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.GONE);
+            sign_out_button.setVisibility(View.VISIBLE);
+            getAToken(authCode);
 
         } else {
-            mStatusTextView.setText(R.string.signed_out);
-            findViewById(R.id.email).setVisibility(View.GONE);
-            findViewById(R.id.editText).setVisibility(View.VISIBLE);
-            findViewById(R.id.status).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.sign_out_button).setVisibility(View.GONE);
-            findViewById(R.id.frameLayout).setVisibility(View.GONE);
+            email.setVisibility(View.GONE);
+            spreadID.setVisibility(View.VISIBLE);
+            mStatusTextView.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.VISIBLE);
+            sign_out_button.setVisibility(View.GONE);
+            frameLayout.setVisibility(View.GONE);
         }
     }
 
@@ -334,6 +327,25 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 revokeAccess();
                 break;
         }
+    }
+
+    private void getAToken(String authCode) {
+        try {
+            GoogleTokenResponse tokenResponse =
+                    new GoogleAuthorizationCodeTokenRequest(
+                            new NetHttpTransport(),
+                            JacksonFactory.getDefaultInstance(),
+                            "https://accounts.google.com/o/oauth2/token",
+                            getString(R.string.client_id),
+                            getString(R.string.client_secret),
+                            authCode,
+                            "")
+                            .execute();
+            accessToken = tokenResponse.getAccessToken();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.i("Token", accessToken);
     }
 
     @SuppressLint("NewApi")
@@ -368,7 +380,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"ID\",\r\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"QR Code\",\r\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" + getDate() + "!A1%3AC1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
