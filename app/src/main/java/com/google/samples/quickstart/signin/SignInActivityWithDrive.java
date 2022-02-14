@@ -3,15 +3,16 @@ package com.google.samples.quickstart.signin;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -43,9 +44,7 @@ import com.google.zxing.Result;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -69,16 +68,21 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private GoogleSignInClient mGoogleSignInClient;
     private TextView mStatusTextView;
 
-    private static String accessToken = "";
-    private static String spreedsheetID = "1-UtMttm026ZF3-km1eo-eBZ8FVth_QTpjI0mgqHB09I";
+    private String accessToken = "";
+    private String spreadsheetID = "";
     private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
-    private static String userName = "";
-
-
+    private String userName = "";
+    private EditText spreadID;
+//    private SharedPreferences sp = getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
+//    private SharedPreferences gsp = getApplicationContext().getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        spreadID = findViewById(R.id.editText);
+//        spreadID.setText(gsp.getString("SPREADSHEETID", ""));
+
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
@@ -252,6 +256,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     // [START signIn]
     private void signIn() {
+        spreadsheetID = spreadID.getText().toString();
+//        SharedPreferences.Editor editor = sp.edit();
+//
+//        editor.putString("SPREADSHEETID", spreadsheetID);
+//        editor.commit();
+
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -289,7 +299,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
             String authCode = account.getServerAuthCode();
             userName = account.getDisplayName();
-            findViewById(R.id.plain_text_input).setVisibility(View.GONE);
+            TextView email = findViewById(R.id.email);
+            email.setText(account.getEmail());
+            findViewById(R.id.email).setVisibility(View.VISIBLE);
+            findViewById(R.id.editText).setVisibility(View.GONE);
             findViewById(R.id.status).setVisibility(View.GONE);
             findViewById(R.id.frameLayout).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
@@ -318,7 +331,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         } else {
             mStatusTextView.setText(R.string.signed_out);
-            findViewById(R.id.plain_text_input).setVisibility(View.VISIBLE);
+            findViewById(R.id.email).setVisibility(View.GONE);
+            findViewById(R.id.editText).setVisibility(View.VISIBLE);
             findViewById(R.id.status).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_button).setVisibility(View.GONE);
@@ -340,13 +354,13 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
-    private static void createSheetPerDay() throws IOException {
+    private void createSheetPerDay() throws IOException {
         OkHttpClient client = new OkHttpClient();
 
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + getDate() + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 20,\r\n            \"columnCount\": 12\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreedsheetID +":batchUpdate")
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetID +":batchUpdate")
                 .method("POST", body)
                 .addHeader("Authorization", "Bearer " +  accessToken)
                 .addHeader("Content-Type", "text/plain")
@@ -369,13 +383,13 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     }
 
 
-    private static void appendSheet(String result) throws IOException {
+    private void appendSheet(String result) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreedsheetID +"/values/" +getDate()+ ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" +getDate()+ ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                                 .method("POST", body)
                                 .addHeader("Authorization", "Bearer " + accessToken)
                                 .addHeader("Content-Type", "text/plain")
