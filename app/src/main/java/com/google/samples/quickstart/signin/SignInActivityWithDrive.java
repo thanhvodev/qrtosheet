@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
@@ -80,6 +81,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private SignInButton signInButton;
     private TextView mStatusTextView;
 
+    private Handler mHandle = new Handler();
+
+    private String authCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +157,13 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         // [END customize_button]
     }
 
+    private Runnable mGetToken = new Runnable() {
+        @Override
+        public void run() {
+            signIn();
+        }
+    };
+
     private void makeSheetOnceADay() {
         SharedPreferences.Editor editor = sp.edit();
         editor.putInt("day", currentDay);
@@ -173,9 +184,11 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null && GoogleSignIn.hasPermissions(account, new Scope("https://www.googleapis.com/auth/spreadsheets"))) {
             updateUI(account);
+            signIn();
         } else {
             updateUI(null);
         }
+
     }
 
     private void askPermission() {
@@ -277,6 +290,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             updateUI(null);
             // [END_EXCLUDE]
         });
+        mHandle.removeCallbacks(mGetToken);
     }
     // [END signOut]
 
@@ -294,7 +308,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
 
-            String authCode = account.getServerAuthCode();
+            authCode = account.getServerAuthCode();
             userName = account.getDisplayName();
             email.setText(account.getEmail());
             email.setVisibility(View.VISIBLE);
@@ -303,8 +317,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             frameLayout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
-            getAToken(authCode);
-
+            getAToken();
+            mHandle.postDelayed(mGetToken, 3_000_000);
         } else {
             email.setVisibility(View.GONE);
             spreadID.setVisibility(View.VISIBLE);
@@ -313,6 +327,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             sign_out_button.setVisibility(View.GONE);
             frameLayout.setVisibility(View.GONE);
         }
+
+
+
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -329,7 +346,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
-    private void getAToken(String authCode) {
+    private void getAToken() {
         try {
             GoogleTokenResponse tokenResponse =
                     new GoogleAuthorizationCodeTokenRequest(
