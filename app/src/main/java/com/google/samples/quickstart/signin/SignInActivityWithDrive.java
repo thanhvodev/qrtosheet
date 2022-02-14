@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -85,7 +89,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private Handler mHandle = new Handler();
 
     private String authCode;
-    private boolean alreadyExecuted = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -425,6 +428,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void onDecoded(Result result) {
 
         runOnUiThread(() -> {
+            makePeep();
             Intent intent = getIntent();
             finish();
             startActivity(intent);
@@ -440,6 +444,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                     e.printStackTrace();
                 }
             }).start();
+
         });
+    }
+
+    private void makePeep() {
+        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 200);
+        toneGenerator.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK);
     }
 }
