@@ -73,15 +73,16 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
     private String userName = "";
     private EditText spreadID;
-//    private SharedPreferences sp = getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
-//    private SharedPreferences gsp = getApplicationContext().getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
+    private SharedPreferences sp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         spreadID = findViewById(R.id.editText);
-//        spreadID.setText(gsp.getString("SPREADSHEETID", ""));
+        sp = getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
+        spreadID.setText(sp.getString("SPREADSHEETID", ""));
 
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
@@ -257,10 +258,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     // [START signIn]
     private void signIn() {
         spreadsheetID = spreadID.getText().toString();
-//        SharedPreferences.Editor editor = sp.edit();
-//
-//        editor.putString("SPREADSHEETID", spreadsheetID);
-//        editor.commit();
+        SharedPreferences.Editor editor = sp.edit();
+
+        editor.putString("SPREADSHEETID", spreadsheetID);
+        editor.commit();
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
