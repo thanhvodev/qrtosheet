@@ -40,6 +40,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.zxing.Result;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -84,7 +85,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private Handler mHandle = new Handler();
 
     private String authCode;
-
+    private boolean alreadyExecuted = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,26 +112,14 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         if (CameraPermission) {
             scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
 
-            mCodeScanner.setDecodeCallback(result -> runOnUiThread(() -> {
-                Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
-                new Thread(() -> {
-                    if (lastDay != currentDay) {
-                        makeSheetOnceADay();
-                    }
-                    try {
-                        appendSheet(result.getText());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }));
+            mCodeScanner.setDecodeCallback(this::onDecoded);
         }
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         // Views
         // Button listeners
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
+        signInButton.setOnClickListener(this);
+        sign_out_button.setOnClickListener(this);
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -272,6 +261,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     // [START signIn]
     private void signIn() {
+
         spreadsheetID = spreadID.getText().toString();
         SharedPreferences.Editor editor = sp.edit();
 
@@ -307,7 +297,14 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
-
+            if (!sp.getBoolean("alreadyExecuted", false)) {
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putBoolean("alreadyExecuted", true);
+                editor.apply();
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
             authCode = account.getServerAuthCode();
             userName = account.getDisplayName();
             email.setText(account.getEmail());
@@ -317,7 +314,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             frameLayout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
-            getAToken();
+            new Thread(this::getAToken).start();
             mHandle.postDelayed(mGetToken, 3_000_000);
         } else {
             email.setVisibility(View.GONE);
@@ -423,5 +420,26 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                                 .addHeader("Content-Type", "text/plain")
                                 .build();
         Response response = client.newCall(request).execute();
+    }
+
+    private void onDecoded(Result result) {
+
+        runOnUiThread(() -> {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+
+            Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
+            new Thread(() -> {
+                if (lastDay != currentDay) {
+                    makeSheetOnceADay();
+                }
+                try {
+                    appendSheet(result.getText());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
     }
 }
