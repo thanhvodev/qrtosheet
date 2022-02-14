@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -26,7 +25,6 @@ import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
-import com.budiyev.android.codescanner.DecodeCallback;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -34,17 +32,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.zxing.Result;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Calendar;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -74,6 +71,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private String userName = "";
     private EditText spreadID;
     private SharedPreferences sp;
+    private int currentDay;
+    private int lastDay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,39 +80,33 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         spreadID = findViewById(R.id.editText);
-        sp = getSharedPreferences("link_to_sheet", Context.MODE_PRIVATE);
+        sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
         spreadID.setText(sp.getString("SPREADSHEETID", ""));
 
+        Calendar calendar = Calendar.getInstance();
+        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+        lastDay = sp.getInt("day", Context.MODE_PRIVATE);
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
         askPermission();
         if (CameraPermission) {
-            scannerView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mCodeScanner.startPreview();
-                }
-            });
+            scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
 
-            mCodeScanner.setDecodeCallback(new DecodeCallback() {
-                @Override
-                public void onDecoded(@NonNull Result result) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
-                            try {
-                                createSheetPerDay();
-                                appendSheet(result.getText());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    });
-                }
-            });
+            mCodeScanner.setDecodeCallback(result -> runOnUiThread(() -> {
+                Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
+                new Thread(() -> {
+                    if (lastDay != currentDay) {
+                        makeSheetOnceADay();
+                    }
+                    try {
+                        appendSheet(result.getText());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }));
         }
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -146,6 +139,18 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         SignInButton signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         // [END customize_button]
+    }
+
+    private void makeSheetOnceADay() {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt("day", currentDay);
+        editor.apply();
+        try {
+            createSheetPerDay();
+            addSheetHeader();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -181,36 +186,20 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                     new AlertDialog.Builder(this).setTitle("Permission").setMessage("Please provide the camera permission for using all the features of the app")
-                            .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM);
-                                }
-                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    }).create().show();
+                            .setPositiveButton("Proceed", (dialogInterface, i) -> ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM)).setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss()).create().show();
                 } else {
                     new AlertDialog.Builder(this).setTitle("Permission").setMessage("You have denied some permission. Allow all permission at [Settings] > [Permissions]")
-                            .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                    finish();
+                            .setPositiveButton("Settings", (dialogInterface, i) -> {
+                                dialogInterface.dismiss();
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
 
-                                }
-                            }).setNegativeButton("No, Exit app", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                            finish();
-                        }
-                    }).create().show();
+                            }).setNegativeButton("No, Exit app", (dialogInterface, i) -> {
+                                dialogInterface.dismiss();
+                                finish();
+                            }).create().show();
                 }
             }
         }
@@ -245,6 +234,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void handleSignInResult(@Nullable Task<GoogleSignInAccount> completedTask) {
         try {
             // Signed in successfully, show authenticated U
+            assert completedTask != null;
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             updateUI(account);
         } catch (ApiException e) {
@@ -261,7 +251,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         SharedPreferences.Editor editor = sp.edit();
 
         editor.putString("SPREADSHEETID", spreadsheetID);
-        editor.commit();
+        editor.apply();
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -270,13 +260,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     // [START signOut]
     private void signOut() {
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                // [START_EXCLUDE]
-                updateUI(null);
-                // [END_EXCLUDE]
-            }
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            // [START_EXCLUDE]
+            updateUI(null);
+            // [END_EXCLUDE]
         });
     }
     // [END signOut]
@@ -284,13 +271,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     // [START revokeAccess]
     private void revokeAccess() {
         mGoogleSignInClient.revokeAccess().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        // [START_EXCLUDE]
-                        updateUI(null);
-                        // [END_EXCLUDE]
-                    }
+                task -> {
+                    // [START_EXCLUDE]
+                    updateUI(null);
+                    // [END_EXCLUDE]
                 });
     }
     // [END revokeAccess]
@@ -309,8 +293,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             findViewById(R.id.sign_in_button).setVisibility(View.GONE);
             findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
 
-//            String accessToken = "";
-
             try {
                 GoogleTokenResponse tokenResponse =
                         new GoogleAuthorizationCodeTokenRequest(
@@ -325,10 +307,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 accessToken = tokenResponse.getAccessToken();
 
             } catch (Exception e) {
+                e.printStackTrace();
             }
-//            mStatusTextView.setText(getString(R.string.signed_in_fmt, accessToken));
             Log.i("Token", accessToken);
-
 
         } else {
             mStatusTextView.setText(R.string.signed_out);
@@ -355,6 +336,16 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
+    @SuppressLint("NewApi")
+    private static String getTime() {
+        return String.valueOf(Calendar.getInstance().getTime());
+    }
+
+    @SuppressLint("NewApi")
+    private static String getDate() {
+        return String.valueOf(LocalDate.now());
+    }
+
     private void createSheetPerDay() throws IOException {
         OkHttpClient client = new OkHttpClient();
 
@@ -373,16 +364,23 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
-    @SuppressLint("NewApi")
-    private static String getTime() {
-        return String.valueOf(LocalTime.now()).substring(0, 5);
+    private void addSheetHeader() {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"ID\",\r\n    ],\r\n  ]\r\n}");
+        Request request = new Request.Builder()
+                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" + getDate() + "!A1%3AC1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer "+accessToken)
+                .addHeader("Content-Type", "text/plain")
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-    @SuppressLint("NewApi")
-    private static String getDate() {
-        return String.valueOf(LocalDate.now());
-    }
-
 
     private void appendSheet(String result) throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
