@@ -49,6 +49,7 @@ import com.google.zxing.Result;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.HashSet;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -102,6 +103,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         spreadID = findViewById(R.id.editText);
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
+
+
         spreadID.setText(sp.getString("SPREADSHEETID", ""));
 
         Calendar calendar = Calendar.getInstance();
@@ -149,12 +152,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         // [END customize_button]
     }
 
-    private Runnable mGetToken = new Runnable() {
-        @Override
-        public void run() {
-            signIn();
-        }
-    };
+    private Runnable mGetToken = () -> signIn();
 
     private void makeSheetOnceADay() {
         SharedPreferences.Editor editor = sp.edit();
@@ -266,8 +264,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void signIn() {
 
         spreadsheetID = spreadID.getText().toString();
-        SharedPreferences.Editor editor = sp.edit();
 
+        if (!spreadsheetID.equals(sp.getString("SPREADSHEETID", ""))) {
+            lastDay = -1;
+        }
+
+        SharedPreferences.Editor editor = sp.edit();
         editor.putString("SPREADSHEETID", spreadsheetID);
         editor.apply();
 
@@ -300,6 +302,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
+            mCodeScanner.startPreview();
             if (!sp.getBoolean("alreadyExecuted", false)) {
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putBoolean("alreadyExecuted", true);
