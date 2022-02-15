@@ -1,11 +1,6 @@
 Qrtosheet
 =========================
 
-The Google Sign-In Android quickstart demonstrates how to authenticate a user with GoogleSignInClient.
-
-Introduction
-------------
-
 - App that allows you to write to sheet by calling Sheets API.
 
 Link APK
@@ -16,8 +11,8 @@ Link APK
 How to use
 ---------------
 
-- Open the App
-- Provide it Camera permission
+- Open the App.
+- Provide it Camera permission.
 - Input Spreadsheet ID( The ID is the value between '/d/' and '/edit' in the URL of the Google Sheet). 
 - Sign in with google and check the provide Editing Sheet permission box( You may need to press 'Advanced option' because this App isn't endorsed by Google).
 - Make sure your accounts have pemissions to write to Spreadsheet.
