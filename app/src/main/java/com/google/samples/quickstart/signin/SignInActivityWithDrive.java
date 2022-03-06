@@ -91,7 +91,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private TextView mStatusTextView;
     private RadioGroup g_tc;
     private RadioGroup g_inout;
-
+    private RadioButton co;
+    private RadioButton in;
     private final Handler mHandle = new Handler();
 
     private String authCode;
@@ -106,9 +107,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button = findViewById(R.id.sign_out_button);
         mStatusTextView = findViewById(R.id.status);
 
-        RadioButton co = findViewById(R.id.co);
+        co = findViewById(R.id.co);
         RadioButton ko = findViewById(R.id.ko);
-        RadioButton in = findViewById(R.id.in);
+        in = findViewById(R.id.in);
         RadioButton out = findViewById(R.id.out);
         g_tc = findViewById(R.id.g_tc);
         g_inout = findViewById(R.id.g_inout);
@@ -198,7 +199,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         editor.apply();
         try {
             createSheetPerDay();
-            addSheetHeader();
+//            addSheetHeader();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -469,34 +470,33 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         }
     }
 
-    private void addSheetHeader() {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"QR Code\",\r\n    ],\r\n  ]\r\n}");
-        Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" + getDate() + "!A1%3AC1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-                .method("PUT", body)
-                .addHeader("Authorization", "Bearer "+accessToken)
-                .addHeader("Content-Type", "text/plain")
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void addSheetHeader() {
+//        OkHttpClient client = new OkHttpClient().newBuilder()
+//                .build();
+//        MediaType mediaType = MediaType.parse("text/plain");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"QR Code\",\r\n      \"XXX\",\n    ],\r\n  ]\r\n}");
+//        Request request = new Request.Builder()
+//                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" + getDate() + "!A1%3AC1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+//                .method("PUT", body)
+//                .addHeader("Authorization", "Bearer "+accessToken)
+//                .addHeader("Content-Type", "text/plain")
+//                .build();
+//        try {
+//            Response response = client.newCall(request).execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void appendSheet(String result) throws IOException {
-        String tc = sp.getBoolean("co", false)? "Có" : "Không";
-        String inout = sp.getBoolean("in", true)? "Vào" : "Ra";
+        String tc = co.isChecked() ? "Có" : "Không";
+        String inout = in.isChecked()? "Vào" : "Ra";
         String time = getTime();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + time + "\",\r\n      \"" + userName +  "\",\r\n      \"" + result + "\",\r\n      \"" + tc + "\",\r\n      \"" + inout + "\"\r\n    ]\r\n  ]\r\n}");
-//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n     ]\r\n  ]\r\n}");
-//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n      \"" + tc +"\",\r\n      \""+ inout +"\"\r\n    ]\r\n  ]\r\n}");
+
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" +getDate()+ ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                                 .method("POST", body)
@@ -507,6 +507,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     }
 
     private void onDecoded(Result result) {
+
+        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
         runOnUiThread(() -> {
 
@@ -520,6 +523,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 }
                 try {
                     appendSheet(result.getText());
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -528,7 +532,5 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             mCodeScanner.startPreview();
 
         });
-
     }
-
 }
