@@ -1,7 +1,7 @@
 Qrtosheet
 =========================
 
-- App that allows you to write to sheet by calling Sheets API.
+- An app that allows you to write to sheet by calling Sheets API.
 
 Link APK
 ------------
