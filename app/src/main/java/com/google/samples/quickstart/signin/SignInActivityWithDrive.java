@@ -431,10 +431,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void onDecoded(Result result) {
 
         runOnUiThread(() -> {
-            makePeep();
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
 
             Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
             new Thread(() -> {
@@ -449,10 +445,5 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             }).start();
 
         });
-    }
-
-    private void makePeep() {
-        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 200);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK);
     }
 }
