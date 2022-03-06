@@ -114,6 +114,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/all_bottom"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -126,6 +127,78 @@
             android:visibility="visible"
             tools:visibility="gone" />
 
-    </RelativeLayout>
+        <RadioGroup
+            android:id="@+id/g_tc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="290dp"
+            android:layout_marginBottom="68dp"
+            android:orientation="vertical"
+            tools:ignore="RelativeOverlap">
 
+            <TextView
+                android:id="@+id/tc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/t_ng_ca"
+                android:textColor="#BCAAA4" />
+
+            <RadioButton
+                android:id="@+id/ko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/kh_ng"
+                android:textColor="#BCAAA4"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <RadioButton
+                android:id="@+id/co"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/c"
+                android:textColor="#BCAAA4"
+                tools:ignore="UsingOnClickInXml" />
+
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/g_inout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="50dp"
+            android:orientation="vertical"
+            tools:ignore="RelativeOverlap">
+
+            <TextView
+                android:id="@+id/inout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/in_out"
+                android:textColor="#BCAAA4" />
+
+            <RadioButton
+                android:id="@+id/in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/in"
+                android:textColor="#BCAAA4" />
+
+            <RadioButton
+                android:id="@+id/out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/out"
+                android:textColor="#BCAAA4" />
+        </RadioGroup>
+    </RelativeLayout>
 </LinearLayout>
