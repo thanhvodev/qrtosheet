@@ -55,5 +55,13 @@
     <string name="server_client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
     <string name="client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
     <string name="client_secret">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</string>
-    <string name="input_spreadsheet_id">Input Spreadsheet ID...</string>
+    <string name="input_spreadsheet_id">Input Spreadsheet ID…</string>
+    <string name="co">Có</string>
+    <string name="t_ng_ca">Tăng ca</string>
+    <string name="c">Có</string>
+    <string name="kh_ng">Không</string>
+    <string name="in_out">In/Out</string>
+    <string name="in">In</string>
+    <string name="out">Out</string>
+
 </resources>

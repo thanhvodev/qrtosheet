@@ -23,10 +23,13 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,8 +89,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private Button sign_out_button;
     private SignInButton signInButton;
     private TextView mStatusTextView;
+    private RadioGroup g_tc;
+    private RadioGroup g_inout;
 
-    private Handler mHandle = new Handler();
+    private final Handler mHandle = new Handler();
 
     private String authCode;
     @Override
@@ -101,8 +106,41 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button = findViewById(R.id.sign_out_button);
         mStatusTextView = findViewById(R.id.status);
 
+        RadioButton co = findViewById(R.id.co);
+        RadioButton ko = findViewById(R.id.ko);
+        RadioButton in = findViewById(R.id.in);
+        RadioButton out = findViewById(R.id.out);
+        g_tc = findViewById(R.id.g_tc);
+        g_inout = findViewById(R.id.g_inout);
+
         spreadID = findViewById(R.id.editText);
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
+
+        co.setOnClickListener(view -> {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("co", true);
+            editor.putBoolean("ko", false);
+        });
+
+        ko.setOnClickListener(view -> {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("ko", true);
+            editor.putBoolean("co", false);
+        });
+
+        in.setOnClickListener(view -> {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("in", true);
+            editor.putBoolean("out", false);
+        });
+
+        out.setOnClickListener(view -> {
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean("out", true);
+            editor.putBoolean("in", false);
+        });
+
+
 
 
         spreadID.setText(sp.getString("SPREADSHEETID", ""));
@@ -152,7 +190,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         // [END customize_button]
     }
 
-    private Runnable mGetToken = () -> signIn();
+    private final Runnable mGetToken = () -> signIn();
 
     private void makeSheetOnceADay() {
         SharedPreferences.Editor editor = sp.edit();
@@ -269,6 +307,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             lastDay = -1;
         }
 
+
+
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("SPREADSHEETID", spreadsheetID);
         editor.apply();
@@ -320,6 +360,29 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             frameLayout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
+//
+//            co.setVisibility(View.VISIBLE);
+//            ko.setVisibility(View.VISIBLE);
+//            out.setVisibility(View.VISIBLE);
+//            in.setVisibility(View.VISIBLE);
+//            tc.setVisibility(View.VISIBLE);
+//            inout.setVisibility(View.VISIBLE);
+
+            g_inout.setVisibility(View.VISIBLE);
+            g_tc.setVisibility(View.VISIBLE);
+
+            if (sp.getBoolean("in", true)) {
+                g_inout.check(R.id.in);
+            } else {
+                g_tc.check(R.id.out);
+            }
+
+            if (sp.getBoolean("ko", true)) {
+                g_tc.check(R.id.ko);
+            } else {
+                g_tc.check(R.id.co);
+            }
+
             new Thread(this::getAToken).start();
             mHandle.postDelayed(mGetToken, 3_000_000);
         } else {
@@ -329,6 +392,16 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             signInButton.setVisibility(View.VISIBLE);
             sign_out_button.setVisibility(View.GONE);
             frameLayout.setVisibility(View.GONE);
+
+//            co.setVisibility(View.GONE);
+//            ko.setVisibility(View.GONE);
+//            out.setVisibility(View.GONE);
+//            in.setVisibility(View.GONE);
+//            tc.setVisibility(View.GONE);
+//            inout.setVisibility(View.GONE);
+
+            g_inout.setVisibility(View.GONE);
+            g_tc.setVisibility(View.GONE);
         }
 
 
@@ -370,7 +443,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     @SuppressLint("NewApi")
     private static String getTime() {
-        return String.valueOf(Calendar.getInstance().getTime());
+        return String.valueOf(Calendar.getInstance().getTime()).substring(11, 16);
     }
 
     @SuppressLint("NewApi")
@@ -415,10 +488,15 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     }
 
     private void appendSheet(String result) throws IOException {
+        String tc = sp.getBoolean("co", false)? "Có" : "Không";
+        String inout = sp.getBoolean("in", true)? "Vào" : "Ra";
+        String time = getTime();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + time + "\",\r\n      \"" + userName +  "\",\r\n      \"" + result + "\",\r\n      \"" + tc + "\",\r\n      \"" + inout + "\"\r\n    ]\r\n  ]\r\n}");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n     ]\r\n  ]\r\n}");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \""+ userName +"\",\r\n      \"" + result + "\"\r\n      \"" + tc +"\",\r\n      \""+ inout +"\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" +getDate()+ ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                                 .method("POST", body)
@@ -431,12 +509,11 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void onDecoded(Result result) {
 
         runOnUiThread(() -> {
-            makePeep();
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
 
-            Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_LONG).show();
+            Toast toast = Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_SHORT);
+            toast.show();
+
+
             new Thread(() -> {
                 if (lastDay != currentDay) {
                     makeSheetOnceADay();
@@ -448,11 +525,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 }
             }).start();
 
+            mCodeScanner.startPreview();
+
         });
+
     }
 
-    private void makePeep() {
-        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 200);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK);
-    }
 }
