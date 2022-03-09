@@ -55,6 +55,10 @@ public class InputInfomation extends AppCompatActivity{
         soDon = extras.getString("soDon");
         username = extras.getString("username");
 
+        //Set Field for số Đơn và Máy và Đơn hàng
+        binding.sodonValue.setText(soDon);
+        binding.mayValue.setText(Build.DISPLAY);
+        binding.don.setChecked(true);
         //For doing request once per day
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
         Calendar calendar = Calendar.getInstance();
@@ -84,6 +88,7 @@ public class InputInfomation extends AppCompatActivity{
                 }
             }).start();
         }
+
         new Thread(()->{
             try {
                 appendData();
@@ -91,6 +96,7 @@ public class InputInfomation extends AppCompatActivity{
                 e.printStackTrace();
             }
         }).start();
+
         Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
         finish();
     }
@@ -139,16 +145,32 @@ public class InputInfomation extends AppCompatActivity{
     }
 
     private void appendData() throws IOException {
+//        String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
+//        OkHttpClient client = new OkHttpClient().newBuilder()
+//                .build();
+//        MediaType mediaType = MediaType.parse("text/plain");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \""+ Build.DISPLAY +"\",\r\n      \"" + soDon +"\",\r\n      \""+ binding.tenhangValue.getText().toString() +"\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\"\r\n      \"Đơn\"\r\n    ]\r\n  ]\r\n}");
+//        Request request = new Request.Builder()
+//                .url("https://sheets.googleapis.com/v4/spreadsheets/1c8R878Ib7MBT_7wd2OcNAeMGanSRL0DeXnSPMN4TSYA/values/Sheet1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY ")
+//                .method("POST", body)
+//                .addHeader("Authorization", "Bearer " + accessToken)
+//                .addHeader("Content-Type", "text/plain")
+//                .build();
+//        Response response = client.newCall(request).execute();
+
+        String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
+
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \""+ Build.DISPLAY +"\",\r\n      \"" + soDon +"\",\r\n      \""+ binding.tenhangValue.getText().toString() +"\",\r\n      \"6\",\r\n      \"7\",\r\n      \"8\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ Build.DISPLAY + "\",\r\n      \"" + soDon + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/1c8R878Ib7MBT_7wd2OcNAeMGanSRL0DeXnSPMN4TSYA/values/Sheet1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY ")
                 .method("POST", body)
-                .addHeader("Authorization", "Bearer " + accessToken)
+                .addHeader("Authorization", "Bearer ya29.A0ARrdaM-jF8IUTAjdLncx0TrdMBaJ6V-VlOLNhDSL0BU1jgveJOvZQs97rblLk_EhmGYba5rMqyVxe5VHCjtFxIZuMS-zSPJ37GmJCyVygB9EOJM5wfuvIt01xn2BCo8JIWzzhqHPvcjOWyLYhl1ANSBrt9-TjqEKgZ8")
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
+
     }
 }
