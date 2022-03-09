@@ -91,10 +91,10 @@
             android:textColor="#000000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.996"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.016" />
+            app:layout_constraintVertical_bias="0.027" />
 
         <TextView
             android:id="@+id/email"
@@ -107,10 +107,10 @@
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toTopOf="@+id/frameLayout"
             app:layout_constraintEnd_toStartOf="@+id/sign_out_button"
-            app:layout_constraintHorizontal_bias="0.708"
+            app:layout_constraintHorizontal_bias="0.718"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.387" />
+            app:layout_constraintVertical_bias="0.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

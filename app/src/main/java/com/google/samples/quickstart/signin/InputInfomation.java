@@ -83,6 +83,7 @@ public class InputInfomation extends AppCompatActivity{
                 try {
                     createSheetPerDay();
                     addHeaderForSheet();
+                    appendData();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -145,18 +146,6 @@ public class InputInfomation extends AppCompatActivity{
     }
 
     private void appendData() throws IOException {
-//        String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
-//        OkHttpClient client = new OkHttpClient().newBuilder()
-//                .build();
-//        MediaType mediaType = MediaType.parse("text/plain");
-//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \""+ Build.DISPLAY +"\",\r\n      \"" + soDon +"\",\r\n      \""+ binding.tenhangValue.getText().toString() +"\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\"\r\n      \"Đơn\"\r\n    ]\r\n  ]\r\n}");
-//        Request request = new Request.Builder()
-//                .url("https://sheets.googleapis.com/v4/spreadsheets/1c8R878Ib7MBT_7wd2OcNAeMGanSRL0DeXnSPMN4TSYA/values/Sheet1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY ")
-//                .method("POST", body)
-//                .addHeader("Authorization", "Bearer " + accessToken)
-//                .addHeader("Content-Type", "text/plain")
-//                .build();
-//        Response response = client.newCall(request).execute();
 
         String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
 
@@ -165,9 +154,9 @@ public class InputInfomation extends AppCompatActivity{
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ Build.DISPLAY + "\",\r\n      \"" + soDon + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/1c8R878Ib7MBT_7wd2OcNAeMGanSRL0DeXnSPMN4TSYA/values/Sheet1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY ")
+                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadSheetID +"/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key="+API_KEY)
                 .method("POST", body)
-                .addHeader("Authorization", "Bearer ya29.A0ARrdaM-jF8IUTAjdLncx0TrdMBaJ6V-VlOLNhDSL0BU1jgveJOvZQs97rblLk_EhmGYba5rMqyVxe5VHCjtFxIZuMS-zSPJ37GmJCyVygB9EOJM5wfuvIt01xn2BCo8JIWzzhqHPvcjOWyLYhl1ANSBrt9-TjqEKgZ8")
+                .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
