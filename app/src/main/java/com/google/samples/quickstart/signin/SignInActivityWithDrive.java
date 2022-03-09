@@ -264,7 +264,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         spreadsheetID = spreadID.getText().toString();
 
         if (!spreadsheetID.equals(sp.getString("SPREADSHEETID", ""))) {
-            lastDay = -1;
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt("day", -1);
+            editor.apply();
         }
 
 
@@ -440,30 +442,14 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+
         Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
-        myIntent.putExtra("key", "value"); //Optional parameters
+        myIntent.putExtra("accessToken", accessToken); //Optional parameters
+        myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
+        myIntent.putExtra("soDon", result.getText()); //Optional parameters
+        myIntent.putExtra("username", userName);
+
         SignInActivityWithDrive.this.startActivity(myIntent);
-//        runOnUiThread(() -> {
-//
-//            Toast toast = Toast.makeText(SignInActivityWithDrive.this, result.getText(), Toast.LENGTH_SHORT);
-//            toast.show();
-//
-//
-//            new Thread(() -> {
-//                if (lastDay != currentDay) {
-//                    makeSheetOnceADay();
-//                }
-//                try {
-//                    appendSheet(result.getText());
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }).start();
-
-//            mCodeScanner.startPreview();
-
-//        });
 
     }
 }
