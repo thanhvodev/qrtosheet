@@ -356,7 +356,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             soDon = result.getText();
             dangQuetSoDon = false;
             binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
-
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mCodeScanner.startPreview();
         } else {
             String may = result.getText();
 
@@ -366,8 +371,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             myIntent.putExtra("so-don-va-may", soDon + "|" + may); //Optional parameters
             myIntent.putExtra("username", userName);
             dangQuetSoDon = true;
-            SignInActivityWithDrive.this.startActivity(myIntent);
             binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+            SignInActivityWithDrive.this.startActivity(myIntent);
         }
 
 
