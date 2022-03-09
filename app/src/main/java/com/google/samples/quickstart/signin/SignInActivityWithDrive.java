@@ -354,34 +354,49 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
-        if (dangQuetSoDon) {
-            soDon = result.getText();
+        runOnUiThread(()->{
+            if (dangQuetSoDon) {
+                soDon = result.getText();
 
-            if (soDon.startsWith("P") || soDon.startsWith("M")) {
-                dangQuetSoDon = false;
-                binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (soDon.startsWith("P") || soDon.startsWith("M")) {
+                    dangQuetSoDon = false;
+                    binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mCodeScanner.startPreview();
+                } else {
+                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng 'P' hoặc 'M'")
+                            .setPositiveButton("OK", (dialogInterface, i) -> {
+                                dialogInterface.dismiss();
+                                mCodeScanner.startPreview();
+                            }).create().show();
                 }
-                mCodeScanner.startPreview();
+
             } else {
+                String may = result.getText();
+
+                if (may.startsWith("Mc#")) {
+                    Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
+                    myIntent.putExtra("accessToken", accessToken); //Optional parameters
+                    myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
+                    myIntent.putExtra("so-don-va-may", soDon + "|" + may); //Optional parameters
+                    myIntent.putExtra("username", userName);
+                    dangQuetSoDon = true;
+                    binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+                    SignInActivityWithDrive.this.startActivity(myIntent);
+                } else {
+                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng 'Mc#'")
+                            .setPositiveButton("OK", (dialogInterface, i) -> {
+                                dialogInterface.dismiss();
+                                mCodeScanner.startPreview();
+                            }).create().show();
+                }
+
             }
-
-        } else {
-            String may = result.getText();
-
-            Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
-            myIntent.putExtra("accessToken", accessToken); //Optional parameters
-            myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
-            myIntent.putExtra("so-don-va-may", soDon + "|" + may); //Optional parameters
-            myIntent.putExtra("username", userName);
-            dangQuetSoDon = true;
-            binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
-            SignInActivityWithDrive.this.startActivity(myIntent);
-        }
-
+        });
 
     }
 }
