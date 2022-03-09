@@ -75,6 +75,11 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private ActivityMainBinding binding;
 
     private String authCode;
+    //for scan 2 times
+    private boolean dangQuetSoDon;
+    private String soDon;
+
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +97,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         spreadID.setText(sp.getString("SPREADSHEETID", ""));
 
+        dangQuetSoDon = true;
+        binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
         askPermission();
@@ -107,9 +115,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         signInButton.setOnClickListener(this);
         sign_out_button.setOnClickListener(this);
 
-        // [START configure_signin]
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope("https://www.googleapis.com/auth/spreadsheets"))
                 .requestEmail()
@@ -132,8 +137,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         // [END customize_button]
     }
 
-    private final Runnable mGetToken = this::signIn;
 
+    private final Runnable mGetToken = this::signIn;
 
     @Override
     public void onStart() {
@@ -294,8 +299,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
             binding.sheetId2.setVisibility(View.VISIBLE);
-            sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
-            binding.sheetId2.setText(sp.getString("SPREADSHEETID", ""));
 
             new Thread(this::getAToken).start();
             mHandle.postDelayed(mGetToken, 3_000_000);
@@ -343,18 +346,30 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         Log.i("Token", accessToken);
     }
 
+    @SuppressLint("SetTextI18n")
     private void onDecoded(Result result) {
 
         ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
-        Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
-        myIntent.putExtra("accessToken", accessToken); //Optional parameters
-        myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
-        myIntent.putExtra("soDon", result.getText()); //Optional parameters
-        myIntent.putExtra("username", userName);
+        if (dangQuetSoDon) {
+            soDon = result.getText();
+            dangQuetSoDon = false;
+            binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
 
-        SignInActivityWithDrive.this.startActivity(myIntent);
+        } else {
+            String may = result.getText();
+
+            Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
+            myIntent.putExtra("accessToken", accessToken); //Optional parameters
+            myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
+            myIntent.putExtra("so-don-va-may", soDon + "|" + may); //Optional parameters
+            myIntent.putExtra("username", userName);
+            dangQuetSoDon = true;
+            SignInActivityWithDrive.this.startActivity(myIntent);
+            binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+        }
+
 
     }
 }

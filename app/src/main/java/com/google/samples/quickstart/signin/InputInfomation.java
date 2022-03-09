@@ -32,7 +32,8 @@ public class InputInfomation extends AppCompatActivity{
     //User Info
     private String accessToken = "";
     private String spreadSheetID = "";
-    private String soDon = "";
+    private String soDon;
+    private String may;
     private String username = "";
     private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
 
@@ -52,12 +53,14 @@ public class InputInfomation extends AppCompatActivity{
         Bundle extras = getIntent().getExtras();
         accessToken = extras.getString("accessToken");
         spreadSheetID = extras.getString("spreadSheetID");
-        soDon = extras.getString("soDon");
+        String[] soDonVaMay = extras.getString("so-don-va-may").split("\\|");
+        soDon = soDonVaMay[0];
+        may = soDonVaMay[1];
         username = extras.getString("username");
 
         //Set Field for số Đơn và Máy và Đơn hàng
         binding.sodonValue.setText(soDon);
-        binding.mayValue.setText(Build.DISPLAY);
+        binding.mayValue.setText(may);
         binding.don.setChecked(true);
         //For doing request once per day
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
@@ -135,7 +138,7 @@ public class InputInfomation extends AppCompatActivity{
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Máy quét\",\r\n      \"Số Đơn\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\"\r\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\"\r\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + "!A1%3AI1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
@@ -152,7 +155,7 @@ public class InputInfomation extends AppCompatActivity{
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ Build.DISPLAY + "\",\r\n      \"" + soDon + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadSheetID +"/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key="+API_KEY)
                 .method("POST", body)
