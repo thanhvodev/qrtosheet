@@ -1,5 +1,6 @@
 package com.google.samples.quickstart.signin;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -16,6 +17,8 @@ import com.google.samples.quickstart.signin.databinding.ActivityInputInfomationB
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 import okhttp3.MediaType;
@@ -43,6 +46,7 @@ public class InputInfomation extends AppCompatActivity{
     private SharedPreferences sp;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +82,7 @@ public class InputInfomation extends AppCompatActivity{
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void handleOK(){
         // create a page in sheet once a day
         if (currentDay != lastDay) {
@@ -117,9 +122,16 @@ public class InputInfomation extends AppCompatActivity{
 
     @SuppressLint("NewApi")
     private static String getDate() {
-        return String.valueOf(LocalDate.now());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate now = LocalDate.now();
+        return dtf.format(now);
     }
-    private static String getTime() { return String.valueOf(Calendar.getInstance().getTime()); }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private static String getTime() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        return dtf.format(now);
+    }
     private void createSheetPerDay() throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -148,6 +160,7 @@ public class InputInfomation extends AppCompatActivity{
         Response response = client.newCall(request).execute();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void appendData() throws IOException {
 
         String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";

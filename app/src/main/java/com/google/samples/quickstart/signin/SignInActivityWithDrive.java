@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -26,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
@@ -354,14 +356,19 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         if (dangQuetSoDon) {
             soDon = result.getText();
-            dangQuetSoDon = false;
-            binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+            if (soDon.startsWith("P") || soDon.startsWith("M")) {
+                dangQuetSoDon = false;
+                binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mCodeScanner.startPreview();
+            } else {
             }
-            mCodeScanner.startPreview();
+
         } else {
             String may = result.getText();
 
