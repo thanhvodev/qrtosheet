@@ -14,37 +14,34 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="3"
-        android:gravity="center_horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/sheet_id"
-        app:layout_constraintTop_toTopOf="@+id/sheet_id">
+        android:gravity="center_horizontal">
 
 
         <TextView
             android:id="@+id/status"
-            android:layout_width="wrap_content"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="108dp"
-            android:text="@string/signed_out"
             android:textColor="@android:color/white"
             android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/sheet_id"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/frameLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <FrameLayout
             android:id="@+id/frameLayout"
-            android:layout_width="0dp"
-            android:layout_height="377dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="16dp"
+            android:layout_width="391dp"
+            android:layout_height="415dp"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/sheet_id"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.786">
+            app:layout_constraintVertical_bias="0.786"
+            tools:visibility="invisible">
 
             <com.budiyev.android.codescanner.CodeScannerView
                 android:id="@+id/scanner_view"
@@ -60,27 +57,20 @@
                 app:frameCornersSize="50dp"
                 app:frameSize="0.75"
                 app:frameThickness="2dp"
-                app:maskColor="@color/cardview_dark_background" />
+                app:maskColor="@color/cardview_dark_background">
+
+            </com.budiyev.android.codescanner.CodeScannerView>
         </FrameLayout>
 
-        <EditText
-            android:id="@+id/sheet_id"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginStart="55dp"
-            android:layout_marginEnd="55dp"
-            android:autofillHints="Input Spreadsheet ID..."
-            android:hint="@string/input_spreadsheet_id"
-            android:inputType="text|textMultiLine"
-            android:minHeight="48dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#80D8FF"
+        <Button
+            android:id="@+id/changeId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_spreadsheetid"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            app:layout_constraintTop_toTopOf="@+id/frameLayout" />
 
         <Button
             android:id="@+id/sign_out_button"

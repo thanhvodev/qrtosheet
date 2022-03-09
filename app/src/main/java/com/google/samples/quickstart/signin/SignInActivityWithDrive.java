@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -24,10 +23,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
@@ -56,6 +53,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
+
     private CodeScanner mCodeScanner;
     boolean CameraPermission = false;
     final int CAMERA_PERM = 1;
@@ -64,7 +62,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private String accessToken = "";
     private String spreadsheetID = "";
     private String userName = "";
-    private EditText spreadID;
     private SharedPreferences sp;
 
     private TextView email;
@@ -94,10 +91,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button = findViewById(R.id.sign_out_button);
         mStatusTextView = findViewById(R.id.status);
 
-        spreadID = findViewById(R.id.sheet_id);
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
 
-        spreadID.setText(sp.getString("SPREADSHEETID", ""));
+        binding.status.setText(sp.getString("SPREADSHEETID", ""));
 
         dangQuetSoDon = true;
         binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
@@ -137,6 +133,11 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         // [END customize_button]
+
+        binding.changeId.setOnClickListener(view -> {
+            Intent myIntent = new Intent(SignInActivityWithDrive.this, ManageSheetID.class);
+            SignInActivityWithDrive.this.startActivity(myIntent);
+        });
     }
 
 
@@ -239,7 +240,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     // [START signIn]
     private void signIn() {
 
-        spreadsheetID = spreadID.getText().toString();
+        spreadsheetID = binding.status.getText().toString();
 
         if (!spreadsheetID.equals(sp.getString("SPREADSHEETID", ""))) {
             SharedPreferences.Editor editor = sp.edit();
@@ -295,23 +296,23 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             userName = account.getDisplayName();
             email.setText(account.getEmail());
             email.setVisibility(View.VISIBLE);
-            spreadID.setVisibility(View.GONE);
             mStatusTextView.setVisibility(View.GONE);
             frameLayout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
             binding.sheetId2.setVisibility(View.VISIBLE);
+            binding.changeId.setVisibility(View.GONE);
 
             new Thread(this::getAToken).start();
             mHandle.postDelayed(mGetToken, 3_000_000);
         } else {
             email.setVisibility(View.GONE);
-            spreadID.setVisibility(View.VISIBLE);
             mStatusTextView.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.VISIBLE);
             sign_out_button.setVisibility(View.GONE);
             frameLayout.setVisibility(View.GONE);
             binding.sheetId2.setVisibility(View.GONE);
+            binding.changeId.setVisibility(View.VISIBLE);
         }
     }
 

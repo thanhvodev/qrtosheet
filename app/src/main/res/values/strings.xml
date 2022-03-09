@@ -83,5 +83,8 @@
     <string name="taiche">Tái chế</string>
     <string name="ok">OK</string>
     <string name="huy">Hủy</string>
+    <string name="change_spreadsheetid">Change SpreadsheetId</string>
+    <string name="nhapmatkhau">Nhập mật khẩu</string>
+    <string name="kiemtra">Kiểm tra</string>
 
 </resources>
