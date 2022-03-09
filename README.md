@@ -6,7 +6,7 @@ Qrtosheet
 Link APK
 ------------
 
-- https://drive.google.com/file/d/1rZiBY9UeTyg0Q2AgBsmbfaOUo8gpNI6o/view?usp=sharing
+- https://drive.google.com/file/d/12U0f1wAITxh9wykn8gsLKIABtrBCMiqe/view?usp=sharing
 
 How to use
 ---------------
