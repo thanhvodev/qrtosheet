@@ -44,16 +44,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.samples.quickstart.signin.databinding.ActivityMainBinding;
 import com.google.zxing.Result;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Calendar;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 
 /**
  * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
@@ -71,12 +61,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private String accessToken = "";
     private String spreadsheetID = "";
-    private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
     private String userName = "";
     private EditText spreadID;
     private SharedPreferences sp;
-    private int currentDay;
-    private int lastDay;
 
     private TextView email;
     private FrameLayout frameLayout;
@@ -104,11 +91,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
 
         spreadID.setText(sp.getString("SPREADSHEETID", ""));
-
-        Calendar calendar = Calendar.getInstance();
-        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-
-        lastDay = sp.getInt("day", Context.MODE_PRIVATE);
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
@@ -152,17 +134,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private final Runnable mGetToken = this::signIn;
 
-    private void makeSheetOnceADay() {
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putInt("day", currentDay);
-        editor.apply();
-        try {
-            createSheetPerDay();
-//            addSheetHeader();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public void onStart() {
@@ -337,9 +308,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             frameLayout.setVisibility(View.GONE);
             binding.sheetId2.setVisibility(View.GONE);
         }
-
-
-
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -373,69 +341,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             e.printStackTrace();
         }
         Log.i("Token", accessToken);
-    }
-
-    @SuppressLint("NewApi")
-    private static String getTime() {
-        return String.valueOf(Calendar.getInstance().getTime()).substring(11, 16);
-    }
-
-    @SuppressLint("NewApi")
-    private static String getDate() {
-        return String.valueOf(LocalDate.now());
-    }
-
-    private void createSheetPerDay() throws IOException {
-        OkHttpClient client = new OkHttpClient();
-
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + getDate() + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 20,\r\n            \"columnCount\": 12\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
-        Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadsheetID +":batchUpdate")
-                .method("POST", body)
-                .addHeader("Authorization", "Bearer " +  accessToken)
-                .addHeader("Content-Type", "text/plain")
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-        } catch (Exception e) {
-
-        }
-    }
-
-//    private void addSheetHeader() {
-//        OkHttpClient client = new OkHttpClient().newBuilder()
-//                .build();
-//        MediaType mediaType = MediaType.parse("text/plain");
-//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"QR Code\",\r\n      \"XXX\",\n    ],\r\n  ]\r\n}");
-//        Request request = new Request.Builder()
-//                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" + getDate() + "!A1%3AC1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-//                .method("PUT", body)
-//                .addHeader("Authorization", "Bearer "+accessToken)
-//                .addHeader("Content-Type", "text/plain")
-//                .build();
-//        try {
-//            Response response = client.newCall(request).execute();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private void appendSheet(String result) throws IOException {
-
-        String time = getTime();
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + time + "\",\r\n      \"" + userName +  "\",\r\n      \"" + result + "\",\r\n      \"" + "BAKA" + "\",\r\n      \"" + "HAHA" + "\"\r\n    ]\r\n  ]\r\n}");
-
-        Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadsheetID +"/values/" +getDate()+ ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-                                .method("POST", body)
-                                .addHeader("Authorization", "Bearer " + accessToken)
-                                .addHeader("Content-Type", "text/plain")
-                                .build();
-        Response response = client.newCall(request).execute();
     }
 
     private void onDecoded(Result result) {
