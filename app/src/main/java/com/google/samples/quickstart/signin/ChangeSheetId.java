@@ -26,6 +26,7 @@ public class ChangeSheetId extends AppCompatActivity {
             editor.apply();
             Intent myIntent = new Intent(ChangeSheetId.this, SignInActivityWithDrive.class);
             ChangeSheetId.this.startActivity(myIntent);
+            finish();
         });
     }
 }

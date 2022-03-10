@@ -24,6 +24,7 @@ public class ManageSheetID extends AppCompatActivity {
             if (binding.matKhau.getText().toString().equals(PASSWORD)) {
                 Intent myIntent = new Intent(ManageSheetID.this, ChangeSheetId.class);
                 ManageSheetID.this.startActivity(myIntent);
+                finish();
             } else {
                 Toast.makeText(this, "Sai mật khẩu", Toast.LENGTH_SHORT).show();
             }
