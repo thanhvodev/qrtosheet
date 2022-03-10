@@ -23,6 +23,7 @@ public class ChangeSheetId extends AppCompatActivity {
         binding.doneInputId.setOnClickListener(view -> {
             SharedPreferences.Editor editor = sp.edit();
             editor.putString("SPREADSHEETID", binding.spreadsheetId.getText().toString());
+            editor.putInt("day", -1);
             editor.apply();
             Intent myIntent = new Intent(ChangeSheetId.this, SignInActivityWithDrive.class);
             ChangeSheetId.this.startActivity(myIntent);
