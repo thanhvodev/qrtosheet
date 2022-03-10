@@ -370,7 +370,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                     mCodeScanner.startPreview();
                 } else {
                     new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng 'P' hoặc 'M'")
-                            .setPositiveButton("OK", (dialogInterface, i) -> {
+                            .setPositiveButton("Quét lại", (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 mCodeScanner.startPreview();
                             }).create().show();
@@ -379,7 +379,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             } else {
                 String may = result.getText();
 
-                if (may.startsWith("Mc#")) {
+                if (may.startsWith("#")) {
                     Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
                     myIntent.putExtra("accessToken", accessToken); //Optional parameters
                     myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
@@ -389,8 +389,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                     binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
                     SignInActivityWithDrive.this.startActivity(myIntent);
                 } else {
-                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng 'Mc#'")
-                            .setPositiveButton("OK", (dialogInterface, i) -> {
+                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng '#'")
+                            .setPositiveButton("Quét lại", (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 mCodeScanner.startPreview();
                             }).create().show();
