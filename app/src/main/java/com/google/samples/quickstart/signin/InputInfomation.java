@@ -93,15 +93,15 @@ public class InputInfomation extends AppCompatActivity{
                     e.printStackTrace();
                 }
             }).start();
+        } else {
+            new Thread(()->{
+                try {
+                    appendData();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         }
-
-        new Thread(()->{
-            try {
-                appendData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
 
         Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
         finish();
