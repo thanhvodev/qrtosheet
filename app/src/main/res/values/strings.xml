@@ -86,5 +86,8 @@
     <string name="change_spreadsheetid">Change SpreadsheetId</string>
     <string name="nhapmatkhau">Nhập mật khẩu</string>
     <string name="kiemtra">Kiểm tra</string>
+    <string name="loaicongdoan">Loại công đoạn</string>
+    <string name="chu_n">Chuẩn</string>
+    <string name="th_m">Thêm</string>
 
 </resources>

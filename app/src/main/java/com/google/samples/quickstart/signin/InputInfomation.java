@@ -63,6 +63,7 @@ public class InputInfomation extends AppCompatActivity{
         binding.sodonValue.setText(soDon);
         binding.mayValue.setText(may);
         binding.don.setChecked(true);
+        binding.chuan.setChecked(true);
         //For doing request once per day
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
         Calendar calendar = Calendar.getInstance();
@@ -70,9 +71,7 @@ public class InputInfomation extends AppCompatActivity{
         lastDay = sp.getInt("day", Context.MODE_PRIVATE);
 
         //handle button
-        binding.ok.setOnClickListener(view -> {
-            handleOK();
-        });
+        binding.ok.setOnClickListener(view -> handleOK());
 
         binding.huy.setOnClickListener(view -> {
             finish();
@@ -147,9 +146,9 @@ public class InputInfomation extends AppCompatActivity{
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\"\r\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\",\r\n      \"Loại công đoạn\"\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + "!A1%3AI1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + "!A1%3AJ1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
@@ -161,11 +160,11 @@ public class InputInfomation extends AppCompatActivity{
     private void appendData() throws IOException {
 
         String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
-
+        String loaiCongDoan = binding.chuan.isChecked()? "Chuẩn" : "Thêm";
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\",\r\n      \""+ loaiCongDoan +"\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadSheetID +"/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key="+API_KEY)
                 .method("POST", body)
