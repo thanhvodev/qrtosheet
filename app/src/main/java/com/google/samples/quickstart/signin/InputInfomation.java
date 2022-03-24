@@ -4,7 +4,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,7 +27,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class InputInfomation extends AppCompatActivity{
+public class InputInfomation extends AppCompatActivity {
 
     //Binding
     com.google.samples.quickstart.signin.databinding.ActivityInputInfomationBinding binding;
@@ -41,7 +44,6 @@ public class InputInfomation extends AppCompatActivity{
     private int currentDay;
     private int lastDay;
     private SharedPreferences sp;
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -79,27 +81,27 @@ public class InputInfomation extends AppCompatActivity{
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void handleOK(){
+    private void handleOK() {
         // create a page in sheet once a day
         if (currentDay != lastDay) {
             setLastDay();
-//            new Thread(()->{
-            try {
-                createSheetPerDay();
-                addHeaderForSheet();
-                appendData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//            }).start();
+            new Thread(() -> {
+                try {
+                    createSheetPerDay();
+                    addHeaderForSheet();
+                    appendData();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         } else {
-//            new Thread(()->{
-            try {
-                appendData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//            }).start();
+            new Thread(() -> {
+                try {
+                    appendData();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         }
 
         finish();
@@ -121,12 +123,14 @@ public class InputInfomation extends AppCompatActivity{
         LocalDate now = LocalDate.now();
         return dtf.format(now);
     }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private static String getTime() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         return dtf.format(now);
     }
+
     private void createSheetPerDay() throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -140,11 +144,6 @@ public class InputInfomation extends AppCompatActivity{
                 .build();
         Response response = client.newCall(request).execute();
 
-        if (response.code() == 200) {
-            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
-        }
     }
 
     private void addHeaderForSheet() throws IOException {
@@ -159,25 +158,19 @@ public class InputInfomation extends AppCompatActivity{
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
-
-        if (response.code() == 200) {
-            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
-        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void appendData() throws IOException {
 
-        String loaiHang = binding.don.isChecked()? "Đơn" : "Tái chế";
-        String loaiCongDoan = binding.chuan.isChecked()? "Chuẩn" : "Thêm";
+        String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
+        String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \""+ getTime() +"\",\r\n      \""+ username +"\",\r\n      \" "+ soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() +"\",\r\n      \""+ binding.trongValue.getText().toString() +"\",\r\n      \""+ binding.ghichuValue.getText().toString() +"\",\r\n      \""+ loaiHang +"\",\r\n      \""+ loaiCongDoan +"\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \" " + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadSheetID +"/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key="+API_KEY)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("POST", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
@@ -185,10 +178,18 @@ public class InputInfomation extends AppCompatActivity{
         Response response = client.newCall(request).execute();
 
         if (response.code() == 200) {
-            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
+            showToastSuccess("Thêm thành công");
         } else {
-            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
+            showToastFail("Thêm số đơn '" +soDon+ "' thất bại! Mã lỗi: "+response.code());
         }
 
+    }
+
+    public void showToastSuccess(final String toast) {
+        runOnUiThread(() -> Toast.makeText(this, toast, Toast.LENGTH_SHORT).show());
+    }
+
+    public void showToastFail(final String toast) {
+        runOnUiThread(() -> Toast.makeText(this, toast, Toast.LENGTH_LONG).show());
     }
 }
