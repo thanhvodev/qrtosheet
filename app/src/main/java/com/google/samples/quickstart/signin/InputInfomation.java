@@ -83,26 +83,25 @@ public class InputInfomation extends AppCompatActivity{
         // create a page in sheet once a day
         if (currentDay != lastDay) {
             setLastDay();
-            new Thread(()->{
-                try {
-                    createSheetPerDay();
-                    addHeaderForSheet();
-                    appendData();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+//            new Thread(()->{
+            try {
+                createSheetPerDay();
+                addHeaderForSheet();
+                appendData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            }).start();
         } else {
-            new Thread(()->{
-                try {
-                    appendData();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+//            new Thread(()->{
+            try {
+                appendData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            }).start();
         }
 
-        Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -140,6 +139,12 @@ public class InputInfomation extends AppCompatActivity{
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
+
+        if (response.code() == 200) {
+            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void addHeaderForSheet() throws IOException {
@@ -154,6 +159,12 @@ public class InputInfomation extends AppCompatActivity{
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
+
+        if (response.code() == 200) {
+            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -172,6 +183,12 @@ public class InputInfomation extends AppCompatActivity{
                 .addHeader("Content-Type", "text/plain")
                 .build();
         Response response = client.newCall(request).execute();
+
+        if (response.code() == 200) {
+            Toast.makeText(InputInfomation.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(InputInfomation.this, "Thêm thất bại! Mã lỗi: "+response.code(), Toast.LENGTH_LONG).show();
+        }
 
     }
 }
