@@ -2,15 +2,20 @@ package com.google.samples.quickstart.signin;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.widget.Toast;
 
 import com.google.samples.quickstart.signin.databinding.ActivityInputInfomationBinding;
@@ -180,7 +185,7 @@ public class InputInfomation extends AppCompatActivity {
         if (response.code() == 200) {
             showToastSuccess("Thêm thành công");
         } else {
-            showToastFail("Thêm số đơn '" +soDon+ "' thất bại! Mã lỗi: "+response.code());
+            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
         }
 
     }
@@ -190,6 +195,9 @@ public class InputInfomation extends AppCompatActivity {
     }
 
     public void showToastFail(final String toast) {
-        runOnUiThread(() -> Toast.makeText(this, toast, Toast.LENGTH_LONG).show());
+        runOnUiThread(() -> {
+            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
+        });
     }
 }

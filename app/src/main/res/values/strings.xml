@@ -89,5 +89,6 @@
     <string name="loaicongdoan">Loại công đoạn</string>
     <string name="chu_n">Chuẩn</string>
     <string name="th_m">Thêm</string>
+    <string name="big_text"><big>Big text.</big></string>
 
 </resources>
