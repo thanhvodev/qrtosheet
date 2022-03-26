@@ -90,5 +90,7 @@
     <string name="chu_n">Chuẩn</string>
     <string name="th_m">Thêm</string>
     <string name="big_text"><big>Big text.</big></string>
+    <string name="channel_name">Channel 1</string>
+    <string name="channel_description">API fail</string>
 
 </resources>

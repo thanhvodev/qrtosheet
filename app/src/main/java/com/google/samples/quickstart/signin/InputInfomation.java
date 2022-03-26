@@ -3,16 +3,21 @@ package com.google.samples.quickstart.signin;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.annotation.SuppressLint;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -25,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -185,7 +191,7 @@ public class InputInfomation extends AppCompatActivity {
         if (response.code() == 200) {
             showToastSuccess("Thêm thành công");
         } else {
-            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
+            addNotification();
         }
 
     }
@@ -199,5 +205,28 @@ public class InputInfomation extends AppCompatActivity {
             Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
             Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
         });
+    }
+
+
+    private void addNotification() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        Notification notification = new NotificationCompat.Builder(this, NotificationFailAlert.CHANNEL_ID)
+                .setContentTitle("THÊM THẤT BẠI")
+                .setContentText("Thêm số đơn '" +soDon+ "', máy '"+ may +"' thất bại! Hãy quét lại!")
+                .setLargeIcon(bitmap)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSound(uri)
+                .setColor(getResources().getColor(R.color.blue_grey_500))
+                .build();
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.notify(getNotificationId(), notification);
+
+    }
+
+    private int getNotificationId() {
+        return (int) new Date().getTime();
     }
 }
