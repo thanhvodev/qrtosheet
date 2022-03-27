@@ -6,7 +6,7 @@ Qrtosheet
 Link APK
 ------------
 
-- https://drive.google.com/file/d/12U0f1wAITxh9wykn8gsLKIABtrBCMiqe/view?usp=sharing
+- https://drive.google.com/file/d/1sXLU7hRTlcbsCjP1BwG25lovR71ilOt3/view?usp=sharing
 
 How to use
 ---------------
@@ -14,10 +14,12 @@ How to use
 - Open the App.
 - Provide it Camera permission.
 - Input Spreadsheet ID( The ID is the value between '/d/' and '/edit' in the URL of the Google Sheet). 
+- You will need password to change Spreadshet ID (Password: 2912001)
 - Sign in with google and check the provide Editing Sheet permission box( You may need to press 'Advanced option' because this App isn't endorsed by Google).
 - Make sure your accounts have pemissions to write to Spreadsheet.
 - Scan to write.
 - It separates results by days. If this is the first you use this App in that day, it automatically create a page with name is that day.
+- If the write is failed by any reasons, it will send you a notification.
 
 Screenshots
 -----------
