@@ -37,7 +37,7 @@ public class ChangeSheetId extends AppCompatActivity {
 
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
+                    if (snapshot.exists() && !snapshot.child(spreadSheetId).exists()) {
                         myRef.child(spreadSheetId).setValue(2);
                     } else {
                         // Don't exist! Do something.

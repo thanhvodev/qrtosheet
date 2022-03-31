@@ -237,12 +237,14 @@ public class InputInfomation extends AppCompatActivity {
             myRef.setValue(lineNumber+1);
         } else {
             setIsFirstRun(true);
-            showToastFail("Thêm số đơn '" +lineNumber+ "' thất bại!");
+            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
         }
     }
 
     public void showToastSuccess(final String toast) {
-        runOnUiThread(() -> Toast.makeText(this, toast, Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> {
+            Toast.makeText(this, Html.fromHtml("<h2>"+toast+"</h2>"), Toast.LENGTH_SHORT).show();
+        });
     }
 
     public void showToastFail(final String toast) {
