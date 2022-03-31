@@ -1,5 +1,7 @@
 package com.google.samples.quickstart.signin;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
@@ -21,8 +23,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.google.samples.quickstart.signin.databinding.ActivityInputInfomationBinding;
 
 import java.io.IOException;
@@ -52,9 +62,11 @@ public class InputInfomation extends AppCompatActivity {
     private final static String API_KEY = "AIzaSyCE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
 
     //For doing request once per day
-    private int currentDay;
-    private int lastDay;
     private SharedPreferences sp;
+    private static int lineNumber;
+    // Write a message to the database
+    FirebaseDatabase database;
+    DatabaseReference myRef;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -67,6 +79,20 @@ public class InputInfomation extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         accessToken = extras.getString("accessToken");
         spreadSheetID = extras.getString("spreadSheetID");
+
+         database = FirebaseDatabase.getInstance();
+         myRef = database.getReference(spreadSheetID);
+         myRef.addValueEventListener(new ValueEventListener() {
+             @Override
+             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                 lineNumber = snapshot.getValue(Integer.class);
+             }
+
+             @Override
+             public void onCancelled(@NonNull DatabaseError error) {
+
+             }
+         });
         String[] soDonVaMay = extras.getString("so-don-va-may").split("\\|");
         soDon = soDonVaMay[0];
         may = soDonVaMay[1];
@@ -79,10 +105,19 @@ public class InputInfomation extends AppCompatActivity {
         binding.chuan.setChecked(true);
         //For doing request once per day
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
-        Calendar calendar = Calendar.getInstance();
-        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        lastDay = sp.getInt("day", Context.MODE_PRIVATE);
+        boolean isFirstRun = sp.getBoolean("isFirstRun", true);
 
+        if (isFirstRun) {
+            new Thread(() -> {
+                try {
+                    createSheet();
+                    addHeaderForSheet();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+            setIsFirstRun(false);
+        }
         //handle button
         binding.ok.setOnClickListener(view -> handleOK());
 
@@ -93,19 +128,6 @@ public class InputInfomation extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void handleOK() {
-        // create a page in sheet once a day
-        if (currentDay != lastDay) {
-            setLastDay();
-            new Thread(() -> {
-                try {
-                    createSheetPerDay();
-                    addHeaderForSheet();
-                    appendData();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } else {
             new Thread(() -> {
                 try {
                     appendData();
@@ -113,21 +135,16 @@ public class InputInfomation extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }).start();
-        }
 
         finish();
     }
 
-    //Update lastDay to currentDay
-    void setLastDay() {
+
+    void setIsFirstRun(boolean isFirstRun) {
         SharedPreferences.Editor editor = sp.edit();
-        editor.putInt("day", currentDay);
+        editor.putBoolean("isFirstRun", isFirstRun);
         editor.apply();
     }
-
-
-    //API CALL
-
     @SuppressLint("NewApi")
     private static String getDate() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -142,11 +159,11 @@ public class InputInfomation extends AppCompatActivity {
         return dtf.format(now);
     }
 
-    private void createSheetPerDay() throws IOException {
+    private void createSheet() throws IOException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + getDate() + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 20,\r\n            \"columnCount\": 12\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + "Output Report" + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 1000,\r\n            \"columnCount\": 26\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + ":batchUpdate")
                 .method("POST", body)
@@ -163,7 +180,7 @@ public class InputInfomation extends AppCompatActivity {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\",\r\n      \"Loại công đoạn\"\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + "!A1%3AJ1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + "!A1%3AJ1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
@@ -171,18 +188,45 @@ public class InputInfomation extends AppCompatActivity {
         Response response = client.newCall(request).execute();
     }
 
+//    @RequiresApi(api = Build.VERSION_CODES.O)
+//    private void appendData() throws IOException {
+//
+//        String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
+//        String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
+//        OkHttpClient client = new OkHttpClient().newBuilder()
+//                .build();
+//        MediaType mediaType = MediaType.parse("text/plain");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \" " + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\r\n    ]\r\n  ]\r\n}");
+//        Request request = new Request.Builder()
+//                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+//                .method("POST", body)
+//                .addHeader("Authorization", "Bearer " + accessToken)
+//                .addHeader("Content-Type", "text/plain")
+//                .build();
+//        Response response = client.newCall(request).execute();
+//
+//        if (response.code() == 200) {
+//            showToastSuccess("Thêm thành công");
+//        } else {
+//            setIsFirstRun(true);
+//            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
+//        }
+//
+//    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void appendData() throws IOException {
-
+// Read from the database
         String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
         String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
+
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \" " + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\r\n    ]\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + getDate() + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-                .method("POST", body)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + "!A" + lineNumber + "%3AJ"+lineNumber +"?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .method("PUT", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
                 .build();
@@ -190,10 +234,11 @@ public class InputInfomation extends AppCompatActivity {
 
         if (response.code() == 200) {
             showToastSuccess("Thêm thành công");
+            myRef.setValue(lineNumber+1);
         } else {
-            addNotification();
+            setIsFirstRun(true);
+            showToastFail("Thêm số đơn '" +lineNumber+ "' thất bại!");
         }
-
     }
 
     public void showToastSuccess(final String toast) {
@@ -202,7 +247,8 @@ public class InputInfomation extends AppCompatActivity {
 
     public void showToastFail(final String toast) {
         runOnUiThread(() -> {
-            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_LONG).show();
             Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
         });
     }
