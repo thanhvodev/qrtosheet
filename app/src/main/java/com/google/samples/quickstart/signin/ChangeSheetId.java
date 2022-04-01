@@ -24,8 +24,8 @@ public class ChangeSheetId extends AppCompatActivity {
         binding = ActivityChangeSheetIdBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("/");
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference myRef = database.getReference("/");
 
         binding.doneInputId.setOnClickListener(view -> {
             String spreadSheetId = binding.spreadsheetId.getText().toString();
@@ -33,24 +33,24 @@ public class ChangeSheetId extends AppCompatActivity {
             editor.putString("SPREADSHEETID", spreadSheetId);
             editor.putBoolean("isFirstRun", true);
             editor.apply();
-            myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    if (snapshot.exists() && !snapshot.child(spreadSheetId).exists()) {
-                        myRef.child(spreadSheetId).setValue(2);
-                    } else {
-                        // Don't exist! Do something.
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    // Failed, how to handle?
-
-                }
-
-            });
+//            myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//
+//                @Override
+//                public void onDataChange(DataSnapshot snapshot) {
+//                    if (snapshot.exists() && !snapshot.child(spreadSheetId).exists()) {
+//                        myRef.child(spreadSheetId).setValue(2);
+//                    } else {
+//                        // Don't exist! Do something.
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError error) {
+//                    // Failed, how to handle?
+//
+//                }
+//
+//            });
             Intent myIntent = new Intent(ChangeSheetId.this, SignInActivityWithDrive.class);
             ChangeSheetId.this.startActivity(myIntent);
             finish();

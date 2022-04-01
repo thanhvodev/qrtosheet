@@ -65,8 +65,8 @@ public class InputInfomation extends AppCompatActivity {
     private SharedPreferences sp;
     private static int lineNumber;
     // Write a message to the database
-    FirebaseDatabase database;
-    DatabaseReference myRef;
+//    FirebaseDatabase database;
+//    DatabaseReference myRef;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -80,19 +80,19 @@ public class InputInfomation extends AppCompatActivity {
         accessToken = extras.getString("accessToken");
         spreadSheetID = extras.getString("spreadSheetID");
 
-         database = FirebaseDatabase.getInstance();
-         myRef = database.getReference(spreadSheetID);
-         myRef.addValueEventListener(new ValueEventListener() {
-             @Override
-             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                 lineNumber = snapshot.getValue(Integer.class);
-             }
-
-             @Override
-             public void onCancelled(@NonNull DatabaseError error) {
-
-             }
-         });
+//         database = FirebaseDatabase.getInstance();
+//         myRef = database.getReference(spreadSheetID);
+//         myRef.addValueEventListener(new ValueEventListener() {
+//             @Override
+//             public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                 lineNumber = snapshot.getValue(Integer.class);
+//             }
+//
+//             @Override
+//             public void onCancelled(@NonNull DatabaseError error) {
+//
+//             }
+//         });
         String[] soDonVaMay = extras.getString("so-don-va-may").split("\\|");
         soDon = soDonVaMay[0];
         may = soDonVaMay[1];
@@ -188,45 +188,18 @@ public class InputInfomation extends AppCompatActivity {
         Response response = client.newCall(request).execute();
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.O)
-//    private void appendData() throws IOException {
-//
-//        String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
-//        String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
-//        OkHttpClient client = new OkHttpClient().newBuilder()
-//                .build();
-//        MediaType mediaType = MediaType.parse("text/plain");
-//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \" " + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\r\n    ]\r\n  ]\r\n}");
-//        Request request = new Request.Builder()
-//                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + ":append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-//                .method("POST", body)
-//                .addHeader("Authorization", "Bearer " + accessToken)
-//                .addHeader("Content-Type", "text/plain")
-//                .build();
-//        Response response = client.newCall(request).execute();
-//
-//        if (response.code() == 200) {
-//            showToastSuccess("Thêm thành công");
-//        } else {
-//            setIsFirstRun(true);
-//            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
-//        }
-//
-//    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void appendData() throws IOException {
-// Read from the database
+
         String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
         String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
-
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \" " + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\r\n    ]\r\n  ]\r\n}");
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + "!A" + lineNumber + "%3AJ"+lineNumber +"?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
-                .method("PUT", body)
+                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/Output Report!A1:J1:append?includeValuesInResponse=true&insertDataOption=INSERT_ROWS&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .method("POST", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .addHeader("Content-Type", "text/plain")
                 .build();
@@ -234,12 +207,39 @@ public class InputInfomation extends AppCompatActivity {
 
         if (response.code() == 200) {
             showToastSuccess("Thêm thành công");
-            myRef.setValue(lineNumber+1);
         } else {
             setIsFirstRun(true);
             showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
         }
+
     }
+
+//    @RequiresApi(api = Build.VERSION_CODES.O)
+//    private void appendData() throws IOException {
+//// Read from the database
+//        String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
+//        String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
+//
+//        OkHttpClient client = new OkHttpClient().newBuilder()
+//                .build();
+//        MediaType mediaType = MediaType.parse("text/plain");
+//        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\n    ],\r\n  ]\r\n}");
+//        Request request = new Request.Builder()
+//                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "Output Report" + "!A" + lineNumber + "%3AJ"+lineNumber +"?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+//                .method("PUT", body)
+//                .addHeader("Authorization", "Bearer " + accessToken)
+//                .addHeader("Content-Type", "text/plain")
+//                .build();
+//        Response response = client.newCall(request).execute();
+//
+//        if (response.code() == 200) {
+//            showToastSuccess("Thêm thành công");
+//            myRef.setValue(lineNumber+1);
+//        } else {
+//            setIsFirstRun(true);
+//            showToastFail("Thêm số đơn '" +soDon+ "' thất bại!");
+//        }
+//    }
 
     public void showToastSuccess(final String toast) {
         runOnUiThread(() -> {
