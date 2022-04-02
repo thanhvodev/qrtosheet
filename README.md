@@ -19,7 +19,7 @@ How to use
 - Make sure your accounts have pemissions to write to Spreadsheet.
 - Scan to write.
 
-Screenshots
+<!-- Screenshots
 -----------
 ![Screenshot](Screenshots/screenshot6.png)
 ![Screenshot](Screenshots/screenshot2.png)
@@ -27,7 +27,7 @@ Screenshots
 ![Screenshot](Screenshots/screenshot5.png)
 ![Screenshot](Screenshots/screenshot4.png)
 ![Screenshot](Screenshots/screenshot1.png)
-
+ -->
 Support
 -------
 
