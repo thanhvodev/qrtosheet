@@ -1,12 +1,12 @@
 Qrtosheet
 =========================
 
-- An app that allows you to write to sheet by calling Sheets API.
+- An app that allows you to write to sheet by calling Sheet API.
 
 Link APK
 ------------
 
-- https://drive.google.com/file/d/1sXLU7hRTlcbsCjP1BwG25lovR71ilOt3/view?usp=sharing
+- https://drive.google.com/file/d/16i_2ofTu_cHAE_XkEnbIGw4MAv82gu6H/view?usp=sharing
 
 How to use
 ---------------
@@ -18,8 +18,6 @@ How to use
 - Sign in with google and check the provide Editing Sheet permission box( You may need to press 'Advanced option' because this App isn't endorsed by Google).
 - Make sure your accounts have pemissions to write to Spreadsheet.
 - Scan to write.
-- It separates results by days. If this is the first you use this App in that day, it automatically create a page with name is that day.
-- If the write is failed by any reasons, it will send you a notification.
 
 Screenshots
 -----------
