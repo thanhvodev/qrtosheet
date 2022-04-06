@@ -52,9 +52,6 @@
     <!-- TODO(user): replace with your real server client ID -->
     <!-- Server Client ID.  This should be a valid Web OAuth 2.0 Client ID obtained
          from https://console.developers.google.com/ -->
-    <string name="server_client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
-    <string name="client_id">489834399744-pjj6cav0483obndbedluhnvjrsj9c2ls.apps.googleusercontent.com</string>
-    <string name="client_secret">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</string>
     <string name="input_spreadsheet_id">Input Spreadsheet ID…</string>
     <string name="co">Có</string>
     <string name="t_ng_ca">Tăng ca</string>

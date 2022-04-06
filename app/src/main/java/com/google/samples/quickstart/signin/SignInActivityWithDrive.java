@@ -91,9 +91,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button = findViewById(R.id.sign_out_button);
         mStatusTextView = findViewById(R.id.status);
 
-        sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Constants.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
 
-        binding.status.setText(sp.getString("SPREADSHEETID", ""));
+        binding.status.setText(sp.getString(Constants.SPREAD_SHEET_ID, ""));
 
         isScanningOrderNo = true;
         binding.requestText.setText("Hãy quét mã cho 'Số Đơn'!");
@@ -116,8 +116,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope("https://www.googleapis.com/auth/spreadsheets"))
                 .requestEmail()
-                .requestServerAuthCode(getString(R.string.server_client_id))
-                .requestIdToken(getString(R.string.server_client_id))
+                .requestServerAuthCode(Secrets.SERVER_CLIENT_ID)
+                .requestIdToken(Secrets.SERVER_CLIENT_ID)
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -232,7 +232,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         spreadsheetID = binding.status.getText().toString();
 
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString("SPREADSHEETID", spreadsheetID);
+        editor.putString(Constants.SPREAD_SHEET_ID, spreadsheetID);
         editor.apply();
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -256,14 +256,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
             mCodeScanner.startPreview();
-            if (!sp.getBoolean("alreadyExecuted", false)) {
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putBoolean("alreadyExecuted", true);
-                editor.apply();
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
+
             authCode = account.getServerAuthCode();
             userName = account.getDisplayName();
             email.setText(account.getEmail());
@@ -309,8 +302,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                             new NetHttpTransport(),
                             JacksonFactory.getDefaultInstance(),
                             "https://accounts.google.com/o/oauth2/token",
-                            getString(R.string.client_id),
-                            getString(R.string.client_secret),
+                            Secrets.CLIENT_ID,
+                            Secrets.CLIENT_SECRET,
                             authCode,
                             "")
                             .execute();
@@ -354,7 +347,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 if (machineNo.startsWith("#")) {
                     Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
                     myIntent.putExtra("accessToken", accessToken); //Optional parameters
-                    myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
+                    myIntent.putExtra(Constants.SPREAD_SHEET_ID, spreadsheetID); //Optional parameters
                     myIntent.putExtra("orderNo&machineNo", orderNo + "|" + machineNo); //Optional parameters
                     myIntent.putExtra("username", userName);
                     isScanningOrderNo = true;

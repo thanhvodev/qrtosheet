@@ -12,14 +12,20 @@ import android.os.Bundle;
 import android.text.Html;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
 import com.google.samples.quickstart.signin.databinding.ActivityInputInfomationBinding;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -39,10 +45,14 @@ public class InputInfomation extends AppCompatActivity {
     private String orderNo;
     private String machineNo;
     private String username;
-    private final static String API_KEY = "ACIzaSyE2B_tzd_72dOds0bZwl5o6qwS0NqIOlY";
+    private final String googleSheetBaseUrl = "https://sheets.googleapis.com/v4/spreadsheets/";
+    private final String writeDataOptions = "?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=";
+    private final int numberOfToast = 3;
+
+    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+
     
     private SharedPreferences sp;
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +63,7 @@ public class InputInfomation extends AppCompatActivity {
         //Get Information from scan intent
         Bundle extras = getIntent().getExtras();
         accessToken = extras.getString("accessToken");
-        spreadSheetID = extras.getString("spreadSheetID");
+        spreadSheetID = extras.getString(Constants.SPREAD_SHEET_ID);
         
         String[] orderNo_machineNo = extras.getString("orderNo&machineNo").split("\\|");
         orderNo = orderNo_machineNo[0];
@@ -65,15 +75,15 @@ public class InputInfomation extends AppCompatActivity {
         binding.orderRadioButton.setChecked(true);
         binding.standardRadioButton.setChecked(true);
         //For doing request once per day
-        sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
-        boolean isFirstRun = sp.getBoolean("isFirstRun", true);
+        sp = getSharedPreferences(Constants.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
+        boolean isFirstRun = sp.getBoolean(Constants.IS_FIRST_RUN, true);
 
         if (isFirstRun) {
             new Thread(() -> {
                 try {
                     createSheet();
                     addHeaderForSheet();
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
             }).start();
@@ -104,7 +114,7 @@ public class InputInfomation extends AppCompatActivity {
 
     void setIsFirstRun(boolean isFirstRun) {
         SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean("isFirstRun", isFirstRun);
+        editor.putBoolean(Constants.IS_FIRST_RUN, isFirstRun);
         editor.apply();
     }
 
@@ -115,42 +125,72 @@ public class InputInfomation extends AppCompatActivity {
         return dtf.format(now);
     }
 
-    private void createSheet() throws IOException {
+    private void createSheet() throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"requests\": [\r\n    {\r\n      \"addSheet\": {\r\n        \"properties\": {\r\n          \"title\": \"" + "OutputReport" + "\",\r\n          \"gridProperties\": {\r\n            \"rowCount\": 1000,\r\n            \"columnCount\": 26\r\n          },\r\n        }\r\n      }\r\n    }\r\n  ]\r\n}");
+        MediaType mediaType = MediaType.parse("application/json");
+
+        //----Make request-----//
+        JSONObject gridProperties = new JSONObject();
+        gridProperties.put("rowCount",1000);
+        gridProperties.put("columnCount", 26);
+
+        JSONObject properties = new JSONObject();
+        properties.put("title", "OutputReport");
+        properties.put("gridProperties", gridProperties);
+
+        JSONObject addSheet = new JSONObject();
+        addSheet.put("properties", properties);
+
+        JSONObject requestJson = new JSONObject();
+        requestJson.put("addSheet", addSheet);
+
+        JSONArray arr = new JSONArray();
+        arr.put(requestJson);
+
+        JSONObject requests = new JSONObject();
+        requests.put("requests", arr);
+
+        RequestBody body = RequestBody.create(mediaType, requests.toString());
+        //----End make request-----//
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + ":batchUpdate")
+                .url(googleSheetBaseUrl + spreadSheetID + ":batchUpdate")
                 .method("POST", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .addHeader("Content-Type", "text/plain")
+                .addHeader("Content-Type", "application/json")
                 .build();
         Response response = client.newCall(request).execute();
-
     }
 
     private void addHeaderForSheet() throws IOException {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\",\r\n      \"Loại công đoạn\"\n    ],\r\n  ]\r\n}");
+
+        MediaType mediaType = MediaType.parse("application/json");
+
+        Map<String, List<List<String>>> dataMap = new HashMap<>();
+        List<String> rowData = Arrays.asList(
+                Constants.COL1, Constants.COL2,
+                Constants.COL3, Constants.COL4,
+                Constants.COL5, Constants.COL6,
+                Constants.COL7, Constants.COL8,
+                Constants.COL9, Constants.COL10
+        );
+        dataMap.put("values", Arrays.asList(rowData));
+
+        RequestBody body = RequestBody.create(mediaType, new JSONObject(dataMap).toString());
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "OutputReport" + "!A1%3AJ1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .url(googleSheetBaseUrl + spreadSheetID + "/values/OutputReport!A1%3AJ1" + writeDataOptions + Secrets.API_KEY)
                 .method("PUT", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .addHeader("Content-Type", "text/plain")
+                .addHeader("Content-Type", "application/json")
                 .build();
-        Response response = client.newCall(request).execute();
+        client.newCall(request).execute();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private int getLineNumber() throws IOException, JSONException {
 
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/"+ spreadSheetID +"/values/OutputReport!B:B?majorDimension=COLUMNS&key=" + API_KEY)
+                .url(googleSheetBaseUrl + spreadSheetID +"/values/OutputReport!B:B?majorDimension=COLUMNS&key=" + Secrets.API_KEY)
                 .method("GET", null)
                 .addHeader("Authorization", "Bearer "+accessToken)
                 .build();
@@ -173,21 +213,32 @@ public class InputInfomation extends AppCompatActivity {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + orderNo + "\",\r\n      \"" + machineNo + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + productType + "\",\r\n      \"" + stageType + "\"\n    ],\r\n  ]\r\n}");
+        MediaType mediaType = MediaType.parse("application/json");
+
+        Map<String, List<List<String>>> dataMap = new HashMap<>();
+        List<String> rowData = Arrays.asList(
+                getTime(), username, orderNo, machineNo,
+                binding.productNameEditText.getText().toString(),
+                binding.plateNumberEditText.getText().toString(),
+                binding.trongValue.getText().toString(),
+                binding.noteEditText.getText().toString(),
+                productType, stageType
+        );
+        dataMap.put("values", Arrays.asList(rowData));
+        RequestBody body = RequestBody.create(mediaType, new JSONObject(dataMap).toString());
         Request request = new Request.Builder()
-                .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "OutputReport" + "!A" + lineNumber + "%3AJ"+lineNumber +"?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
+                .url(googleSheetBaseUrl + spreadSheetID + "/values/OutputReport!A" + lineNumber + "%3AJ"+ lineNumber + writeDataOptions + Secrets.API_KEY)
                 .method("PUT", body)
                 .addHeader("Authorization", "Bearer " + accessToken)
-                .addHeader("Content-Type", "text/plain")
+                .addHeader("Content-Type", "application/json")
                 .build();
         Response response = client.newCall(request).execute();
 
         if (response.code() == 200) {
-            showToastSuccess("Thêm thành công");
+            showToastSuccess(Constants.SUCCESS);
         } else {
             setIsFirstRun(true);
-            showToastFail("Thêm số đơn '" +orderNo+ "' thất bại!");
+            showToastFail(Constants.FAIL + orderNo);
         }
     }
 
@@ -199,32 +250,9 @@ public class InputInfomation extends AppCompatActivity {
 
     public void showToastFail(final String toast) {
         runOnUiThread(() -> { // make toast appear longer
-            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_LONG).show();
-            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_LONG).show();
-            Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_SHORT).show();
+            for (int i = 0; i < numberOfToast; i++) {
+                Toast.makeText(this, Html.fromHtml("<h1>"+toast+"</h1>"), Toast.LENGTH_LONG).show();
+            }
         });
     }
-
-
-//    private void addNotification() {
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-//        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//
-//        Notification notification = new NotificationCompat.Builder(this, NotificationFailAlert.CHANNEL_ID)
-//                .setContentTitle("THÊM THẤT BẠI")
-//                .setContentText("Thêm số đơn '" +orderNo+ "', máy '"+ may +"' thất bại! Hãy quét lại!")
-//                .setLargeIcon(bitmap)
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setSound(uri)
-//                .setColor(getResources().getColor(R.color.blue_grey_500))
-//                .build();
-//
-//        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-//        notificationManagerCompat.notify(getNotificationId(), notification);
-//
-//    }
-
-//    private int getNotificationId() {
-//        return (int) new Date().getTime();
-//    }
 }

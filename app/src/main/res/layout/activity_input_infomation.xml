@@ -114,7 +114,7 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
-        android:id="@+id/tenhang_value"
+        android:id="@+id/productNameEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -138,12 +138,12 @@
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:minHeight="48dp"
-        app:layout_constraintStart_toStartOf="@+id/sotam_value"
-        app:layout_constraintTop_toBottomOf="@+id/sotam_value"
+        app:layout_constraintStart_toStartOf="@+id/plateNumberEditText"
+        app:layout_constraintTop_toBottomOf="@+id/plateNumberEditText"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
-        android:id="@+id/ghichu_value"
+        android:id="@+id/noteEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -165,7 +165,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.61"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ghichu_value"
+        app:layout_constraintTop_toBottomOf="@+id/noteEditText"
         app:layout_constraintVertical_bias="0.110000014">
 
         <RadioButton
@@ -204,7 +204,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/sotam_value"
+        android:id="@+id/plateNumberEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="17dp"
@@ -216,8 +216,8 @@
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/sotam"
-        app:layout_constraintStart_toStartOf="@+id/tenhang_value"
-        app:layout_constraintTop_toBottomOf="@+id/tenhang_value"
+        app:layout_constraintStart_toStartOf="@+id/productNameEditText"
+        app:layout_constraintTop_toBottomOf="@+id/productNameEditText"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <RadioGroup

@@ -23,13 +23,13 @@ public class ChangeSheetId extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChangeSheetIdBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Constants.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
 
         binding.doneInputId.setOnClickListener(view -> {
             String spreadSheetId = binding.spreadsheetIdTextView.getText().toString();
             SharedPreferences.Editor editor = sp.edit();
-            editor.putString("SPREADSHEETID", spreadSheetId);
-            editor.putBoolean("isFirstRun", true);
+            editor.putString(Constants.SPREAD_SHEET_ID, spreadSheetId);
+            editor.putBoolean(Constants.IS_FIRST_RUN, true);
             editor.apply();
 
             Intent myIntent = new Intent(ChangeSheetId.this, SignInActivityWithDrive.class);

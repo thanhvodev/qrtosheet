@@ -13,7 +13,6 @@ import com.google.samples.quickstart.signin.databinding.ActivityManageSheetIdBin
 
 public class ManageSheetID extends AppCompatActivity {
     private ActivityManageSheetIdBinding binding;
-    private static final String PASSWORD = "2912001";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,12 +20,12 @@ public class ManageSheetID extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.kiemTra.setOnClickListener(view -> {
-            if (binding.passwordTextView.getText().toString().equals(PASSWORD)) {
+            if (binding.passwordTextView.getText().toString().equals(Secrets.PASSWORD)) {
                 Intent myIntent = new Intent(ManageSheetID.this, ChangeSheetId.class);
                 ManageSheetID.this.startActivity(myIntent);
                 finish();
             } else {
-                Toast.makeText(this, "Sai mật khẩu", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, Constants.WRONG_PASSWORD_TEXT, Toast.LENGTH_SHORT).show();
             }
         });
 
