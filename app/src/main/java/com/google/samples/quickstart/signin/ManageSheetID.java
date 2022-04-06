@@ -21,7 +21,7 @@ public class ManageSheetID extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.kiemTra.setOnClickListener(view -> {
-            if (binding.matKhau.getText().toString().equals(PASSWORD)) {
+            if (binding.passwordTextView.getText().toString().equals(PASSWORD)) {
                 Intent myIntent = new Intent(ManageSheetID.this, ChangeSheetId.class);
                 ManageSheetID.this.startActivity(myIntent);
                 finish();

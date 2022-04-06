@@ -3,8 +3,6 @@ package com.google.samples.quickstart.signin;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,9 +59,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     final int CAMERA_PERM = 1;
     private GoogleSignInClient mGoogleSignInClient;
 
-    private String accessToken = "";
-    private String spreadsheetID = "";
-    private String userName = "";
+    private String accessToken;
+    private String spreadsheetID;
+    private String userName;
     private SharedPreferences sp;
 
     private TextView email;
@@ -77,8 +75,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     private String authCode;
     //for scan 2 times
-    private boolean dangQuetSoDon;
-    private String soDon;
+    private boolean isScanningOrderNo;
+    private String orderNo;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -97,8 +95,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         binding.status.setText(sp.getString("SPREADSHEETID", ""));
 
-        dangQuetSoDon = true;
-        binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+        isScanningOrderNo = true;
+        binding.requestText.setText("Hãy quét mã cho 'Số Đơn'!");
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
@@ -121,17 +119,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 .requestServerAuthCode(getString(R.string.server_client_id))
                 .requestIdToken(getString(R.string.server_client_id))
                 .build();
-        // [END configure_signin]
 
-        // [START build_client]
-        // Build a GoogleSignInClient with access to the Google Sign-In API and the
-        // options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        // [END build_client]
-
-        // [START customize_button]
-        // Customize sign-in button. The sign-in button can be displayed in
-        // multiple sizes.
 
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         // [END customize_button]
@@ -207,8 +196,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         if (CameraPermission) {
             mCodeScanner.releaseResources();
         }
-        super.onPause();
 
+        super.onPause();
     }
 
     // [START onActivityResult]
@@ -237,20 +226,10 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             updateUI(null);
         }
     }
-    // [END handleSignInResult]
 
-    // [START signIn]
     private void signIn() {
 
         spreadsheetID = binding.status.getText().toString();
-
-        if (!spreadsheetID.equals(sp.getString("SPREADSHEETID", ""))) {
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putInt("day", -1);
-            editor.apply();
-        }
-
-
 
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("SPREADSHEETID", spreadsheetID);
@@ -263,11 +242,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
     // [START signOut]
     private void signOut() {
-        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
-            // [START_EXCLUDE]
-            updateUI(null);
-            // [END_EXCLUDE]
-        });
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> updateUI(null));
         mHandle.removeCallbacks(mGetToken);
     }
     // [END signOut]
@@ -275,13 +250,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     // [START revokeAccess]
     private void revokeAccess() {
         mGoogleSignInClient.revokeAccess().addOnCompleteListener(this,
-                task -> {
-                    // [START_EXCLUDE]
-                    updateUI(null);
-                    // [END_EXCLUDE]
-                });
+                task -> updateUI(null));
     }
-    // [END revokeAccess]
 
     private void updateUI(@Nullable GoogleSignInAccount account) {
         if (account != null) {
@@ -302,18 +272,18 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             frameLayout.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.GONE);
             sign_out_button.setVisibility(View.VISIBLE);
-            binding.sheetId2.setVisibility(View.VISIBLE);
+            binding.requestText.setVisibility(View.VISIBLE);
             binding.changeId.setVisibility(View.GONE);
 
             new Thread(this::getAToken).start();
-            mHandle.postDelayed(mGetToken, 3_000_000);
+            mHandle.postDelayed(mGetToken, 3_000_000); // delay between two scanning
         } else {
             email.setVisibility(View.GONE);
             mStatusTextView.setVisibility(View.VISIBLE);
             signInButton.setVisibility(View.VISIBLE);
             sign_out_button.setVisibility(View.GONE);
             frameLayout.setVisibility(View.GONE);
-            binding.sheetId2.setVisibility(View.GONE);
+            binding.requestText.setVisibility(View.GONE);
             binding.changeId.setVisibility(View.VISIBLE);
         }
     }
@@ -358,12 +328,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
         runOnUiThread(()->{
-            if (dangQuetSoDon) {
-                soDon = result.getText();
+            if (isScanningOrderNo) {
+                orderNo = result.getText();
 
-                if (soDon.startsWith("P") || soDon.startsWith("M")) {
-                    dangQuetSoDon = false;
-                    binding.sheetId2.setText("Hãy quét mã cho 'Máy'!");
+                if (orderNo.startsWith("P") || orderNo.startsWith("M")) {
+                    isScanningOrderNo = false;
+                    binding.requestText.setText("Hãy quét mã cho 'Máy'!");
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -379,16 +349,16 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 }
 
             } else {
-                String may = result.getText();
+                String machineNo = result.getText();
 
-                if (may.startsWith("#")) {
+                if (machineNo.startsWith("#")) {
                     Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
                     myIntent.putExtra("accessToken", accessToken); //Optional parameters
                     myIntent.putExtra("spreadSheetID", spreadsheetID); //Optional parameters
-                    myIntent.putExtra("so-don-va-may", soDon + "|" + may); //Optional parameters
+                    myIntent.putExtra("orderNo&machineNo", orderNo + "|" + machineNo); //Optional parameters
                     myIntent.putExtra("username", userName);
-                    dangQuetSoDon = true;
-                    binding.sheetId2.setText("Hãy quét mã cho 'Số Đơn'!");
+                    isScanningOrderNo = true;
+                    binding.requestText.setText("Hãy quét mã cho 'Số Đơn'!");
                     SignInActivityWithDrive.this.startActivity(myIntent);
                 } else {
                     new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng '#'")
@@ -397,7 +367,6 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                                 mCodeScanner.startPreview();
                             }).create().show();
                 }
-
             }
         });
 

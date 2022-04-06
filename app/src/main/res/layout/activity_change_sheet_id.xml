@@ -7,7 +7,7 @@
     tools:context=".ChangeSheetId">
 
     <EditText
-        android:id="@+id/spreadsheet_id"
+        android:id="@+id/spreadsheetIdTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -32,5 +32,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spreadsheet_id" />
+        app:layout_constraintTop_toBottomOf="@+id/spreadsheetIdTextView" />
 </androidx.constraintlayout.widget.ConstraintLayout>

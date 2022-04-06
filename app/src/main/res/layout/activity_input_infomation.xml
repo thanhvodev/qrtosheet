@@ -47,7 +47,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tenhang" />
 
     <EditText
-        android:id="@+id/sodon_value"
+        android:id="@+id/orderTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
@@ -97,7 +97,7 @@
         app:layout_constraintTop_toBottomOf="@+id/ghichu" />
 
     <EditText
-        android:id="@+id/may_value"
+        android:id="@+id/machineTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -109,8 +109,8 @@
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/sodon_value"
-        app:layout_constraintTop_toBottomOf="@+id/sodon_value"
+        app:layout_constraintStart_toStartOf="@+id/orderTextView"
+        app:layout_constraintTop_toBottomOf="@+id/orderTextView"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
@@ -125,7 +125,7 @@
         android:inputType="textPersonName"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/may_value"
+        app:layout_constraintTop_toBottomOf="@+id/machineTextView"
         tools:ignore="DuplicateSpeakableTextCheck,TextContrastCheck" />
 
     <EditText
@@ -169,14 +169,14 @@
         app:layout_constraintVertical_bias="0.110000014">
 
         <RadioButton
-            android:id="@+id/don"
+            android:id="@+id/orderRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:text="@string/don" />
 
         <RadioButton
-            android:id="@+id/taiche"
+            android:id="@+id/recycleRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
@@ -194,7 +194,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/huy"
+        android:id="@+id/cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
@@ -231,7 +231,7 @@
         app:layout_constraintVertical_bias="0.16000003">
 
         <RadioButton
-            android:id="@+id/chuan"
+            android:id="@+id/standardRadioButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"

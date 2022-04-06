@@ -121,7 +121,7 @@
         </com.google.android.gms.common.SignInButton>
 
         <TextView
-            android:id="@+id/sheet_id2"
+            android:id="@+id/requestText"
             android:layout_width="277dp"
             android:layout_height="110dp"
             android:layout_alignParentStart="true"
@@ -129,7 +129,7 @@
             android:layout_marginStart="77dp"
             android:layout_marginBottom="80dp"
             android:textColor="@android:color/white"
-            android:textSize="30sp"/>
+            android:textSize="30sp" />
 
     </RelativeLayout>
 </LinearLayout>
