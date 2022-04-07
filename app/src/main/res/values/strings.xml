@@ -84,10 +84,31 @@
     <string name="nhapmatkhau">Nhập mật khẩu</string>
     <string name="kiemtra">Kiểm tra</string>
     <string name="loaicongdoan">Loại công đoạn</string>
-    <string name="chu_n">Chuẩn</string>
-    <string name="th_m">Thêm</string>
+    <string name="chuan">Chuẩn</string>
+    <string name="them">Thêm</string>
     <string name="big_text"><big>Big text.</big></string>
     <string name="channel_name">Channel 1</string>
     <string name="channel_description">API fail</string>
+    <string name="action_description_orderNo">Hãy quét mã cho \'Số Đơn\'!</string>
+    <string name="action_description_machineNo">Hãy quét mã cho \'Máy\'!</string>
+    <string name="alert_description_orderNo">Mã vạch phải bắt đầu bằng \'P\' hoặc \'M\'</string>
+    <string name="alert_description_machineNo">Mã vạch phải bắt đầu bằng \'P\' hoặc \'M\'</string>
+    <string name="alert_description_title">Sai Format</string>
+    <string name="alert_description_action">Quét lại</string>
+    <string name="success_message">Thêm thành công</string>
+    <string name="fail_message">Thêm số đơn \'%1$s\' thất bại!</string>
+    <string name="check_condition_orderNo_1">P</string>
+    <string name="check_condition_orderNo_2">M</string>
+    <string name="check_condition_machineNo">#</string>
+
+
+    <string name="CAMERA_PERMISSION_TITLE">Permission</string>
+    <string name="CAMERA_PERMISSION_MESSAGE">Please provide the camera permission for using all the features of the app</string>
+    <string name="CAMERA_PERMISSION_MESSAGE_DENIED">You have denied some permission. Allow all permission at [Settings] > [Permissions]</string>
+    <string name="CAMERA_PERMISSION_ALLOW">Proceed</string>
+    <string name="CAMERA_PERMISSION_DENIED">Cancel</string>
+    <string name="CAMERA_PERMISSION_DENIED_EXIT">No, Exit app</string>
+    <string name="CAMERA_PERMISSION_ALLOW_SETTINGS">Settings</string>
+    <string name="WRONG_PASSWORD_TEXT">Sai mật khẩu</string>
 
 </resources>

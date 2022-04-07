@@ -77,6 +77,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
     //for scan 2 times
     private boolean isScanningOrderNo;
     private String orderNo;
+    private final String scopeBaseUrl = "https://www.googleapis.com/auth/spreadsheets";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -91,12 +92,12 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button = findViewById(R.id.sign_out_button);
         mStatusTextView = findViewById(R.id.status);
 
-        sp = getSharedPreferences(Constants.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
+        sp = getSharedPreferences(LocalStorage.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
 
-        binding.status.setText(sp.getString(Constants.SPREAD_SHEET_ID, ""));
+        binding.status.setText(sp.getString(LocalStorage.SPREAD_SHEET_ID, ""));
 
         isScanningOrderNo = true;
-        binding.requestText.setText("Hãy quét mã cho 'Số Đơn'!");
+        binding.requestText.setText(getString(R.string.action_description_orderNo));
 
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
@@ -114,7 +115,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         sign_out_button.setOnClickListener(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/spreadsheets"))
+                .requestScopes(new Scope(scopeBaseUrl))
                 .requestEmail()
                 .requestServerAuthCode(Secrets.SERVER_CLIENT_ID)
                 .requestIdToken(Secrets.SERVER_CLIENT_ID)
@@ -140,7 +141,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
 
         // Check if the user is already signed in and all required scopes are granted
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null && GoogleSignIn.hasPermissions(account, new Scope("https://www.googleapis.com/auth/spreadsheets"))) {
+        if (account != null && GoogleSignIn.hasPermissions(account, new Scope(scopeBaseUrl))) {
             updateUI(account);
             signIn();
         } else {
@@ -168,18 +169,19 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                 CameraPermission = true;
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                    new AlertDialog.Builder(this).setTitle("Permission").setMessage("Please provide the camera permission for using all the features of the app")
-                            .setPositiveButton("Proceed", (dialogInterface, i) -> ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM)).setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss()).create().show();
+                    new AlertDialog.Builder(this).setTitle(getString(R.string.CAMERA_PERMISSION_TITLE)).setMessage(getString(R.string.CAMERA_PERMISSION_MESSAGE))
+                            .setPositiveButton(getString(R.string.CAMERA_PERMISSION_ALLOW), (dialogInterface, i) -> ActivityCompat.requestPermissions(SignInActivityWithDrive.this, new String[] {Manifest.permission.CAMERA}, CAMERA_PERM))
+                            .setNegativeButton(getString(R.string.CAMERA_PERMISSION_DENIED), (dialogInterface, i) -> dialogInterface.dismiss()).create().show();
                 } else {
-                    new AlertDialog.Builder(this).setTitle("Permission").setMessage("You have denied some permission. Allow all permission at [Settings] > [Permissions]")
-                            .setPositiveButton("Settings", (dialogInterface, i) -> {
+                    new AlertDialog.Builder(this).setTitle(getString(R.string.CAMERA_PERMISSION_TITLE)).setMessage(getString(R.string.CAMERA_PERMISSION_MESSAGE_DENIED))
+                            .setPositiveButton(getString(R.string.CAMERA_PERMISSION_ALLOW_SETTINGS), (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
                                 finish();
 
-                            }).setNegativeButton("No, Exit app", (dialogInterface, i) -> {
+                            }).setNegativeButton(getString(R.string.CAMERA_PERMISSION_DENIED_EXIT), (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 finish();
                             }).create().show();
@@ -232,7 +234,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
         spreadsheetID = binding.status.getText().toString();
 
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(Constants.SPREAD_SHEET_ID, spreadsheetID);
+        editor.putString(LocalStorage.SPREAD_SHEET_ID, spreadsheetID);
         editor.apply();
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -269,7 +271,7 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             binding.changeId.setVisibility(View.GONE);
 
             new Thread(this::getAToken).start();
-            mHandle.postDelayed(mGetToken, 3_000_000); // delay between two scanning
+            mHandle.postDelayed(mGetToken, 3_000_000); // get new access token after 50 minutes
         } else {
             email.setVisibility(View.GONE);
             mStatusTextView.setVisibility(View.VISIBLE);
@@ -324,9 +326,9 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             if (isScanningOrderNo) {
                 orderNo = result.getText();
 
-                if (orderNo.startsWith("P") || orderNo.startsWith("M")) {
+                if (orderNo.startsWith(getString(R.string.check_condition_orderNo_1)) || orderNo.startsWith(getString(R.string.check_condition_orderNo_2))) {
                     isScanningOrderNo = false;
-                    binding.requestText.setText("Hãy quét mã cho 'Máy'!");
+                    binding.requestText.setText(getString(R.string.action_description_machineNo));
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
@@ -334,8 +336,8 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
                     }
                     mCodeScanner.startPreview();
                 } else {
-                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng 'P' hoặc 'M'")
-                            .setPositiveButton("Quét lại", (dialogInterface, i) -> {
+                    new AlertDialog.Builder(this).setTitle(getString(R.string.alert_description_title)).setMessage(getString(R.string.alert_description_orderNo))
+                            .setPositiveButton(getString(R.string.alert_description_action), (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 mCodeScanner.startPreview();
                             }).create().show();
@@ -344,18 +346,18 @@ public class SignInActivityWithDrive extends AppCompatActivity implements
             } else {
                 String machineNo = result.getText();
 
-                if (machineNo.startsWith("#")) {
+                if (machineNo.startsWith(getString(R.string.check_condition_machineNo))) {
                     Intent myIntent = new Intent(SignInActivityWithDrive.this, InputInfomation.class);
-                    myIntent.putExtra("accessToken", accessToken); //Optional parameters
-                    myIntent.putExtra(Constants.SPREAD_SHEET_ID, spreadsheetID); //Optional parameters
-                    myIntent.putExtra("orderNo&machineNo", orderNo + "|" + machineNo); //Optional parameters
-                    myIntent.putExtra("username", userName);
+                    myIntent.putExtra(LocalStorage.ACCESS_TOKEN, accessToken); //Optional parameters
+                    myIntent.putExtra(LocalStorage.SPREAD_SHEET_ID, spreadsheetID); //Optional parameters
+                    myIntent.putExtra(LocalStorage.ORDER_MACHINE_NO, orderNo + "|" + machineNo); //Optional parameters
+                    myIntent.putExtra(LocalStorage.USER_NAME, userName);
                     isScanningOrderNo = true;
-                    binding.requestText.setText("Hãy quét mã cho 'Số Đơn'!");
+                    binding.requestText.setText(getString(R.string.action_description_orderNo));
                     SignInActivityWithDrive.this.startActivity(myIntent);
                 } else {
-                    new AlertDialog.Builder(this).setTitle("Sai Format").setMessage("Mã vạch phải bắt đầu bằng '#'")
-                            .setPositiveButton("Quét lại", (dialogInterface, i) -> {
+                    new AlertDialog.Builder(this).setTitle(getString(R.string.alert_description_title)).setMessage(getString(R.string.alert_description_machineNo))
+                            .setPositiveButton(getString(R.string.alert_description_action), (dialogInterface, i) -> {
                                 dialogInterface.dismiss();
                                 mCodeScanner.startPreview();
                             }).create().show();

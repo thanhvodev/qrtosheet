@@ -62,21 +62,21 @@ public class InputInfomation extends AppCompatActivity {
 
         //Get Information from scan intent
         Bundle extras = getIntent().getExtras();
-        accessToken = extras.getString("accessToken");
-        spreadSheetID = extras.getString(Constants.SPREAD_SHEET_ID);
+        accessToken = extras.getString(LocalStorage.ACCESS_TOKEN);
+        spreadSheetID = extras.getString(LocalStorage.SPREAD_SHEET_ID);
         
-        String[] orderNo_machineNo = extras.getString("orderNo&machineNo").split("\\|");
+        String[] orderNo_machineNo = extras.getString(LocalStorage.SPREAD_SHEET_ID).split("\\|");
         orderNo = orderNo_machineNo[0];
         machineNo = orderNo_machineNo[1];
-        username = extras.getString("username");
+        username = extras.getString(LocalStorage.USER_NAME);
 
         binding.orderTextView.setText(orderNo);
         binding.machineTextView.setText(machineNo);
         binding.orderRadioButton.setChecked(true);
         binding.standardRadioButton.setChecked(true);
         //For doing request once per day
-        sp = getSharedPreferences(Constants.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
-        boolean isFirstRun = sp.getBoolean(Constants.IS_FIRST_RUN, true);
+        sp = getSharedPreferences(LocalStorage.LOCAL_STORAGE_NAME, Context.MODE_PRIVATE);
+        boolean isFirstRun = sp.getBoolean(LocalStorage.IS_FIRST_RUN, true);
 
         if (isFirstRun) {
             new Thread(() -> {
@@ -114,7 +114,7 @@ public class InputInfomation extends AppCompatActivity {
 
     void setIsFirstRun(boolean isFirstRun) {
         SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean(Constants.IS_FIRST_RUN, isFirstRun);
+        editor.putBoolean(LocalStorage.IS_FIRST_RUN, isFirstRun);
         editor.apply();
     }
 
@@ -198,18 +198,16 @@ public class InputInfomation extends AppCompatActivity {
 
         if (response.code() == 200) {
             JSONObject obj = new JSONObject(Objects.requireNonNull(response.body()).string());
-            return obj.getJSONArray("values").get(0).toString().split(",").length+1;
+            return obj.getJSONArray("values").get(0).toString().split(",").length + 1;
         } else {
             return -1;
         }
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void appendData(int lineNumber) throws IOException {
-// Read from the database
-        String productType = binding.orderRadioButton.isChecked() ? "Đơn" : "Tái chế";
-        String stageType = binding.standardRadioButton.isChecked() ? "Chuẩn" : "Thêm";
+        String productType = binding.orderRadioButton.isChecked() ? getString(R.string.don) : getString(R.string.taiche);
+        String stageType = binding.standardRadioButton.isChecked() ? getString(R.string.chuan) : getString(R.string.them);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -235,10 +233,10 @@ public class InputInfomation extends AppCompatActivity {
         Response response = client.newCall(request).execute();
 
         if (response.code() == 200) {
-            showToastSuccess(Constants.SUCCESS);
+            showToastSuccess(getString(R.string.success_message));
         } else {
             setIsFirstRun(true);
-            showToastFail(Constants.FAIL + orderNo);
+            showToastFail(getString(R.string.fail_message, orderNo));
         }
     }
 

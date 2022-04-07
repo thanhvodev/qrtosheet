@@ -25,7 +25,7 @@ public class ManageSheetID extends AppCompatActivity {
                 ManageSheetID.this.startActivity(myIntent);
                 finish();
             } else {
-                Toast.makeText(this, Constants.WRONG_PASSWORD_TEXT, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.WRONG_PASSWORD_TEXT), Toast.LENGTH_SHORT).show();
             }
         });
 
