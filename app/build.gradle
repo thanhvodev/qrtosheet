@@ -23,11 +23,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
-        exclude 'LICENSE.txt'
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            excludes += ['LICENSE.txt', 'META-INF/DEPENDENCIES']
+        }
     }
+
     buildFeatures {
         viewBinding true
     }
