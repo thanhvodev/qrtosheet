@@ -80,6 +80,10 @@
     <string name="ghichu">Ghi chú</string>
     <string name="loaihang">Loại hàng</string>
     <string name="don">Đơn</string>
+    <string name="congdoanhientai">Công đoạn hiện tại</string>
+    <string name="congdoantieptheo">Công đoạn tiếp theo</string>
+    <string name="CDhientai">CĐHT</string>
+    <string name="CDtieptheo">CĐTT</string>
     <string name="taiche">Tái chế</string>
     <string name="ok">OK</string>
     <string name="huy">Hủy</string>

@@ -26,26 +26,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sodon_lable" />
 
-    <TextView
-        android:id="@+id/tenhang"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="36dp"
-        android:text="@string/tenhang"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/may" />
-
-    <TextView
-        android:id="@+id/sotam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="44dp"
-        android:text="@string/sotam"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tenhang" />
-
     <EditText
         android:id="@+id/sodon_value"
         android:layout_width="wrap_content"
@@ -64,37 +44,27 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <TextView
-        android:id="@+id/trong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/trong"
-        app:layout_constraintBottom_toBottomOf="@+id/trong_value"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
         android:id="@+id/ghichu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
         android:layout_marginTop="52dp"
-        android:layout_marginEnd="64dp"
         android:text="@string/ghichu"
-        app:layout_constraintEnd_toEndOf="@+id/loaihang"
-        app:layout_constraintTop_toBottomOf="@+id/trong" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loaihang" />
 
     <TextView
         android:id="@+id/loaihang"
         android:layout_width="72dp"
         android:layout_height="65dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="52dp"
         android:layout_marginEnd="16dp"
         android:text="@string/loaihang"
         app:layout_constraintEnd_toStartOf="@+id/radioGroup"
-        app:layout_constraintHorizontal_bias="0.253"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ghichu" />
+        app:layout_constraintTop_toBottomOf="@+id/trong" />
 
     <EditText
         android:id="@+id/may_value"
@@ -114,59 +84,32 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
-        android:id="@+id/tenhang_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="40dp"
-        android:ems="10"
-        android:hint="@string/tenhang"
-        android:importantForAutofill="no"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/may_value"
-        tools:ignore="DuplicateSpeakableTextCheck,TextContrastCheck" />
-
-    <EditText
-        android:id="@+id/trong_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:ems="10"
-        android:hint="@string/trong"
-        android:importantForAutofill="no"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
-        app:layout_constraintStart_toStartOf="@+id/sotam_value"
-        app:layout_constraintTop_toBottomOf="@+id/sotam_value"
-        tools:ignore="DuplicateSpeakableTextCheck" />
-
-    <EditText
         android:id="@+id/ghichu_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="40dp"
         android:ems="10"
         android:hint="@string/ghichu"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:minHeight="48dp"
-        app:layout_constraintStart_toStartOf="@+id/trong_value"
-        app:layout_constraintTop_toBottomOf="@+id/trong_value"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/ghichu"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.61"
+        app:layout_constraintHorizontal_bias="0.667"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ghichu_value"
-        app:layout_constraintVertical_bias="0.110000014">
+        app:layout_constraintTop_toBottomOf="@+id/trong_value"
+        app:layout_constraintVertical_bias="0.112">
 
         <RadioButton
             android:id="@+id/don"
@@ -207,52 +150,108 @@
         android:id="@+id/sotam_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        android:layout_marginEnd="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="44dp"
         android:ems="10"
         android:hint="@string/sotam"
         android:importantForAutofill="no"
         android:inputType="numberSigned"
         android:minHeight="48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/sotam"
-        app:layout_constraintStart_toStartOf="@+id/tenhang_value"
-        app:layout_constraintTop_toBottomOf="@+id/tenhang_value"
+        app:layout_constraintTop_toBottomOf="@+id/congdoantieptheo_value"
         tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <EditText
+        android:id="@+id/trong_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="44dp"
+        android:ems="10"
+        android:hint="@string/trong"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sotam_value"
+        tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <TextView
+        android:id="@+id/sotam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="44dp"
+        android:text="@string/sotam"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/congdoantieptheo" />
+
+    <TextView
+        android:id="@+id/trong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="40dp"
+        android:text="@string/trong"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sotam" />
 
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.28"
-        app:layout_constraintStart_toEndOf="@+id/loaicongdoan"
         app:layout_constraintTop_toBottomOf="@+id/radioGroup"
-        app:layout_constraintVertical_bias="0.16000003">
-
-        <RadioButton
-            android:id="@+id/chuan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:text="@string/chu_n" />
-
-        <RadioButton
-            android:id="@+id/them"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:text="@string/th_m" />
-    </RadioGroup>
+        app:layout_constraintVertical_bias="0.16000003"/>
 
     <TextView
-        android:id="@+id/loaicongdoan"
+        android:id="@+id/congdoanhientai"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="56dp"
-        android:text="@string/loaicongdoan"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="40dp"
+        android:text="@string/CDhientai"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loaihang" />
+        app:layout_constraintTop_toBottomOf="@+id/may" />
+
+    <EditText
+        android:id="@+id/congdoanhientai_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="48dp"
+        android:ems="10"
+        android:hint="@string/congdoanhientai"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/congdoanhientai"
+        app:layout_constraintTop_toBottomOf="@+id/may_value" />
+
+    <TextView
+        android:id="@+id/congdoantieptheo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="52dp"
+        android:text="@string/CDtieptheo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/congdoanhientai" />
+
+    <EditText
+        android:id="@+id/congdoantieptheo_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="44dp"
+        android:ems="10"
+        android:hint="@string/congdoantieptheo"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.969"
+        app:layout_constraintStart_toEndOf="@+id/congdoantieptheo"
+        app:layout_constraintTop_toBottomOf="@+id/congdoanhientai_value" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

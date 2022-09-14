@@ -85,19 +85,6 @@ public class InputInfomation extends AppCompatActivity {
         accessToken = extras.getString("accessToken");
         spreadSheetID = extras.getString("spreadSheetID");
 
-//         database = FirebaseDatabase.getInstance();
-//         myRef = database.getReference(spreadSheetID);
-//         myRef.addValueEventListener(new ValueEventListener() {
-//             @Override
-//             public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                 lineNumber = snapshot.getValue(Integer.class);
-//             }
-//
-//             @Override
-//             public void onCancelled(@NonNull DatabaseError error) {
-//
-//             }
-//         });
         String[] soDonVaMay = extras.getString("so-don-va-may").split("\\|");
         soDon = soDonVaMay[0];
         may = soDonVaMay[1];
@@ -107,7 +94,6 @@ public class InputInfomation extends AppCompatActivity {
         binding.sodonValue.setText(soDon);
         binding.mayValue.setText(may);
         binding.don.setChecked(true);
-        binding.chuan.setChecked(true);
         //For doing request once per day
         sp = getSharedPreferences("localStorage", Context.MODE_PRIVATE);
         boolean isFirstRun = sp.getBoolean("isFirstRun", true);
@@ -151,16 +137,10 @@ public class InputInfomation extends AppCompatActivity {
         editor.putBoolean("isFirstRun", isFirstRun);
         editor.apply();
     }
-//    @SuppressLint("NewApi")
-//    private static String getDate() {
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-//        LocalDate now = LocalDate.now();
-//        return dtf.format(now);
-//    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private static String getTime() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         return dtf.format(now);
     }
@@ -184,7 +164,7 @@ public class InputInfomation extends AppCompatActivity {
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Tên hàng\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Ghi chú\",\r\n      \"Loại hàng\",\r\n      \"Loại công đoạn\"\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"Thời gian quét\",\r\n      \"Người quét\",\r\n      \"Số Đơn\",\r\n      \"Máy\",\r\n      \"Công đoạn hiện tại\",\r\n      \"Công đoạn tiếp theo\",\r\n      \"Số tấm\",\r\n      \"Trống\",\r\n      \"Loại hàng\",\r\n      \"Ghi chú\"\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "OutputReport" + "!A1%3AJ1?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
@@ -246,12 +226,11 @@ public class InputInfomation extends AppCompatActivity {
     private void appendData(int lineNumber) throws IOException {
 // Read from the database
         String loaiHang = binding.don.isChecked() ? "Đơn" : "Tái chế";
-        String loaiCongDoan = binding.chuan.isChecked() ? "Chuẩn" : "Thêm";
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.tenhangValue.getText().toString() + "\",\r\n      \""+ binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + loaiCongDoan + "\"\n    ],\r\n  ]\r\n}");
+        RequestBody body = RequestBody.create(mediaType, "{\r\n  \"values\": [\r\n    [\r\n      \"" + getTime() + "\",\r\n      \"" + username + "\",\r\n      \"" + soDon + "\",\r\n      \"" + may + "\",\r\n      \"" + binding.congdoanhientaiValue.getText().toString() + "\",\r\n      \""+ binding.congdoantieptheoValue.getText().toString() + "\",\r\n      \"" + binding.sotamValue.getText().toString() + "\",\r\n      \"" + binding.trongValue.getText().toString() + "\",\r\n      \"" + loaiHang + "\",\r\n      \"" + binding.ghichuValue.getText().toString() + "\"\n    ],\r\n  ]\r\n}");
         Request request = new Request.Builder()
                 .url("https://sheets.googleapis.com/v4/spreadsheets/" + spreadSheetID + "/values/" + "OutputReport" + "!A" + lineNumber + "%3AJ"+lineNumber +"?includeValuesInResponse=true&responseDateTimeRenderOption=FORMATTED_STRING&responseValueRenderOption=FORMATTED_VALUE&valueInputOption=USER_ENTERED&key=" + API_KEY)
                 .method("PUT", body)
